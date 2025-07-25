@@ -1,0 +1,21 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="NOTAM_Browser.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="notamFont" Type="System.Drawing.Font" Scope="User">
+      <Value Profile="(Default)">Consolas, 9.75pt</Value>
+    </Setting>
+    <Setting Name="urlPre" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://www.notams.faa.gov/dinsQueryWeb/queryRetrievalMapAction.do?reportType=Raw&amp;retrieveLocId=</Value>
+    </Setting>
+    <Setting Name="urlAft" Type="System.String" Scope="User">
+      <Value Profile="(Default)">&amp;actionType=notamRetrievalByICAOs</Value>
+    </Setting>
+    <Setting Name="notamPre" Type="System.String" Scope="User">
+      <Value Profile="(Default)">&lt;PRE&gt;</Value>
+    </Setting>
+    <Setting Name="notamAft" Type="System.String" Scope="User">
+      <Value Profile="(Default)">&lt;/PRE&gt;</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

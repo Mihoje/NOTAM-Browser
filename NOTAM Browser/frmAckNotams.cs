@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace NOTAM_Browser
 {
-    public partial class frmAckNotams: Form
+    public partial class frmAckNotams : Form
     {
         private readonly Notams nos;
         public frmAckNotams(Notams nos)
@@ -28,7 +28,7 @@ namespace NOTAM_Browser
             var results = tlpMain.Controls.Find($"txtNotam{NotamID}", false);
 
 
-            if(results.Length == 0)
+            if (results.Length == 0)
             {
 #if DEBUG
                 Debug.WriteLine($"frmAckNotams: Didn't find TextBox for the removed NOTAM! [{NotamID}]");
@@ -44,8 +44,9 @@ namespace NOTAM_Browser
 
             tlpMain.RowStyles.RemoveAt(row);
             tlpMain.RowCount--;
-
+#if DEBUG
             Debug.WriteLine($"frmAckNotams: Removed notam {NotamID}");
+#endif
         }
 
         private void NewNotamAcknowledged(string NotamID)

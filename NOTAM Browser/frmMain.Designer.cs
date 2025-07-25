@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.lblStaticIcaoDesignators = new System.Windows.Forms.Label();
             this.txtSearch = new System.Windows.Forms.TextBox();
@@ -40,16 +41,17 @@
             this.stsStripMain = new System.Windows.Forms.StatusStrip();
             this.slblData = new System.Windows.Forms.ToolStripStatusLabel();
             this.slblLatestNotam = new System.Windows.Forms.ToolStripStatusLabel();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.menuMain = new System.Windows.Forms.MenuStrip();
             this.nOTAMiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prikaziProcitaneNOTAMeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.podesavanjaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fontToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.chkFilterAck = new System.Windows.Forms.CheckBox();
             this.promeniPodešavanjaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.chkFilterAck = new System.Windows.Forms.CheckBox();
+            this.tooltipDesignators = new System.Windows.Forms.ToolTip(this.components);
             this.grpFilters.SuspendLayout();
             this.stsStripMain.SuspendLayout();
-            this.menuStrip1.SuspendLayout();
+            this.menuMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblStaticIcaoDesignators
@@ -169,16 +171,16 @@
             this.slblLatestNotam.Size = new System.Drawing.Size(149, 17);
             this.slblLatestNotam.Text = "Poslednje ažuriranje: Nikad";
             // 
-            // menuStrip1
+            // menuMain
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.nOTAMiToolStripMenuItem,
             this.podesavanjaToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(626, 24);
-            this.menuStrip1.TabIndex = 7;
-            this.menuStrip1.Text = "menuStrip1";
+            this.menuMain.Location = new System.Drawing.Point(0, 0);
+            this.menuMain.Name = "menuMain";
+            this.menuMain.Size = new System.Drawing.Size(626, 24);
+            this.menuMain.TabIndex = 7;
+            this.menuMain.Text = "menuStrip1";
             // 
             // nOTAMiToolStripMenuItem
             // 
@@ -211,6 +213,13 @@
             this.fontToolStripMenuItem.Text = "Font...";
             this.fontToolStripMenuItem.Click += new System.EventHandler(this.fontToolStripMenuItem_Click);
             // 
+            // promeniPodešavanjaToolStripMenuItem
+            // 
+            this.promeniPodešavanjaToolStripMenuItem.Name = "promeniPodešavanjaToolStripMenuItem";
+            this.promeniPodešavanjaToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
+            this.promeniPodešavanjaToolStripMenuItem.Text = "Napredna podešavanja...";
+            this.promeniPodešavanjaToolStripMenuItem.Click += new System.EventHandler(this.promeniPodešavanjaToolStripMenuItem_Click);
+            // 
             // chkFilterAck
             // 
             this.chkFilterAck.AutoSize = true;
@@ -222,12 +231,12 @@
             this.chkFilterAck.UseVisualStyleBackColor = true;
             this.chkFilterAck.CheckedChanged += new System.EventHandler(this.chkFilterAck_CheckedChanged);
             // 
-            // promeniPodešavanjaToolStripMenuItem
+            // tooltipDesignators
             // 
-            this.promeniPodešavanjaToolStripMenuItem.Name = "promeniPodešavanjaToolStripMenuItem";
-            this.promeniPodešavanjaToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
-            this.promeniPodešavanjaToolStripMenuItem.Text = "Napredna podešavanja...";
-            this.promeniPodešavanjaToolStripMenuItem.Click += new System.EventHandler(this.promeniPodešavanjaToolStripMenuItem_Click);
+            this.tooltipDesignators.AutoPopDelay = 5000;
+            this.tooltipDesignators.InitialDelay = 100;
+            this.tooltipDesignators.IsBalloon = true;
+            this.tooltipDesignators.ReshowDelay = 100;
             // 
             // frmMain
             // 
@@ -236,7 +245,7 @@
             this.ClientSize = new System.Drawing.Size(626, 558);
             this.Controls.Add(this.chkFilterAck);
             this.Controls.Add(this.stsStripMain);
-            this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.menuMain);
             this.Controls.Add(this.btnGetNotams);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.tlpMain);
@@ -244,7 +253,7 @@
             this.Controls.Add(this.txtSearch);
             this.Controls.Add(this.lblStaticIcaoDesignators);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MainMenuStrip = this.menuStrip1;
+            this.MainMenuStrip = this.menuMain;
             this.MinimumSize = new System.Drawing.Size(642, 377);
             this.Name = "frmMain";
             this.Text = "NOTAMI";
@@ -253,8 +262,8 @@
             this.grpFilters.PerformLayout();
             this.stsStripMain.ResumeLayout(false);
             this.stsStripMain.PerformLayout();
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
+            this.menuMain.ResumeLayout(false);
+            this.menuMain.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -273,13 +282,14 @@
         private System.Windows.Forms.StatusStrip stsStripMain;
         private System.Windows.Forms.ToolStripStatusLabel slblLatestNotam;
         private System.Windows.Forms.ToolStripStatusLabel slblData;
-        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.MenuStrip menuMain;
         private System.Windows.Forms.ToolStripMenuItem nOTAMiToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prikaziProcitaneNOTAMeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem podesavanjaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fontToolStripMenuItem;
         private System.Windows.Forms.CheckBox chkFilterAck;
         private System.Windows.Forms.ToolStripMenuItem promeniPodešavanjaToolStripMenuItem;
+        private System.Windows.Forms.ToolTip tooltipDesignators;
     }
 }
 

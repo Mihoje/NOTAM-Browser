@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
@@ -8,9 +7,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("NOTAM Browser")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Mihail Panagiotopoulos")]
+[assembly: AssemblyCompany("MihaSoftware")]
 [assembly: AssemblyProduct("NOTAM Browser")]
-[assembly: AssemblyCopyright("Copyright © Mihail Panagiotopoulos 2025")]
+[assembly: AssemblyCopyright("Copyright © MihaSoftware 2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

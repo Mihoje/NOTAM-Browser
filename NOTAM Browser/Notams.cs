@@ -1,19 +1,16 @@
-﻿using System;
+﻿using NOTAM_Browser.Properties;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Text.Json;
-using System.IO;
-using System.Windows.Forms;
-using System.Runtime.Remoting.Messaging;
-using System.Text.Json.Serialization;
-using System.Net;
-using System.Net.Http;
-using System.Text.RegularExpressions;
+#if DEBUG
 using System.Diagnostics;
-using System.Runtime.InteropServices.WindowsRuntime;
-using NOTAM_Browser.Properties;
+#endif
+using System.IO;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace NOTAM_Browser
 {
@@ -94,7 +91,7 @@ namespace NOTAM_Browser
                 if (notamValidityStr[1] == "PERM") notamValidityStr[1] = "9901010000"; //If the notam is PERM, set the end date at 2099
 
 
-                for(int i = 0; i < 2; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     int[] parsed = new int[5];
                     /*
@@ -107,11 +104,11 @@ namespace NOTAM_Browser
 
                     bool success = true;
 
-                    for(int j = 0; j < 5; j++) //parsing data, each 2 chars long 
+                    for (int j = 0; j < 5; j++) //parsing data, each 2 chars long 
                     {
                         success &= int.TryParse(notamValidityStr[i].Substring(j * 2, 2), out parsed[j]);
                     }
-                    
+
                     if (!success)
                     {
                         notamValidity[0] = new DateTime(1, 1, 1);
@@ -122,7 +119,7 @@ namespace NOTAM_Browser
                     notamValidity[i] = new DateTime(parsed[0] + 2000, parsed[1], parsed[2], parsed[3], parsed[4], 0);
                 }
 
-                if(Date >= notamValidity[0] && Date <= notamValidity[1])
+                if (Date >= notamValidity[0] && Date <= notamValidity[1])
                     filteredNotams.Add(notam.Key, notam.Value);
             }
 
@@ -177,7 +174,7 @@ namespace NOTAM_Browser
                 CurrentNotamsTime = DateTime.Now;
                 LastSearch = Designators;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 #if DEBUG
                 MessageBox.Show($"Greška u toku dobijanja NOTAM-a: {ex.ToString()}");
@@ -206,8 +203,9 @@ namespace NOTAM_Browser
             if (!AcknowledgedNotams.ContainsKey(NotamID)) return true;
 
             AcknowledgedNotams.Remove(NotamID);
-
+#if DEBUG
             Debug.WriteLine($"Notams: fired unacknowledged event for {NotamID}!");
+#endif
             // fire the event
             NotamUnacknowledged?.Invoke(NotamID);
 
@@ -228,7 +226,7 @@ namespace NOTAM_Browser
             {
                 File.WriteAllText(fullFileName, fileText);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 #if DEBUG
                 MessageBox.Show($"Neuspešno čuvanje fajla:\n{ex.ToString()}", "Greška", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -256,5 +254,5 @@ namespace NOTAM_Browser
         }
     }
 
-    
+
 }

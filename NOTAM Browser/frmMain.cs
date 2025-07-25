@@ -1,7 +1,6 @@
 ﻿using NOTAM_Browser.Properties;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -20,7 +19,7 @@ namespace NOTAM_Browser
 
             notamFont = Settings.Default.notamFont;
 
-            if(notamFont == null)
+            if (notamFont == null)
             {
                 Settings.Default.notamFont = (Font)Settings.Default.Properties["notamFont"].DefaultValue;
                 Settings.Default.Save();
@@ -41,6 +40,8 @@ namespace NOTAM_Browser
             txtSearch.Text = nos.LastSearch;
             txtSearch.SelectionStart = txtSearch.TextLength;
             slblLatestNotam.Text = $"Poslednje ažuriranje: {nos.CurrentNotamsTime}";
+
+            tooltipDesignators.SetToolTip(txtSearch, "Unesi ICAO designator ili više njih razdvojenih razmakom.\n\nPrimer:'LYBT' ili 'LYBT,LYBA'");
         }
 
         private async void pretraziNotame()
@@ -72,7 +73,7 @@ namespace NOTAM_Browser
 
                 SizeF textSize = txt.CreateGraphics().MeasureString(txt.Text + Environment.NewLine + "a" + Environment.NewLine + "a", txt.Font, 10000, new StringFormat(0));
 
-                txt.Height = (int)textSize.Height+1; //nekad se desava da zbog nekog razloga malo zakine pa dodajem 2 px for good measure
+                txt.Height = (int)textSize.Height + 1; //nekad se desava da zbog nekog razloga malo zakine pa dodajem 2 px for good measure
             }
         }
 
@@ -113,8 +114,8 @@ namespace NOTAM_Browser
                 tlpMain.RowStyles.Add(new RowStyle(SizeType.AutoSize));
                 tlpMain.RowCount += 1;
 
-                tlpMain.Controls.Add(chk, 0, tlpMain.RowCount-1);
-                tlpMain.Controls.Add(txt, 1, tlpMain.RowCount-1);
+                tlpMain.Controls.Add(chk, 0, tlpMain.RowCount - 1);
+                tlpMain.Controls.Add(txt, 1, tlpMain.RowCount - 1);
 
 #if DEBUG
                 Debug.WriteLine($"frmMain: Dodao red za {pair.Key}\tControl count: {tlpMain.Controls.Count}\t Row count: {tlpMain.RowCount}");
@@ -124,7 +125,7 @@ namespace NOTAM_Browser
 
             SetTextBoxHeights();
 
-            slblData.Text = $"NOTAM-i za: {nos.LastSearch} | {tlpMain.RowCount} NOTAM{ (tlpMain.RowCount == 1 ? "" : "-a") }";
+            slblData.Text = $"NOTAM-i za: {nos.LastSearch} | {tlpMain.RowCount} NOTAM{(tlpMain.RowCount == 1 ? "" : "-a")}";
         }
 
         private void RefreshNotams()
@@ -196,7 +197,7 @@ namespace NOTAM_Browser
 
         private void Chk_CheckedChanged(object sender, EventArgs e)
         {
-            if(!(sender is CheckBox)) return;
+            if (!(sender is CheckBox)) return;
 
             CheckBox chk = (CheckBox)sender;
 
@@ -213,7 +214,7 @@ namespace NOTAM_Browser
                 {
                     var results = tlpMain.Controls.Find($"txtNotam{notamId}", false);
 
-                    if(results.Length == 0)
+                    if (results.Length == 0)
                     {
 #if DEBUG
                         Debug.WriteLine($"frmMain: Can't find txtNotam in chk_chkeckChanged [{notamId}]");
@@ -228,6 +229,8 @@ namespace NOTAM_Browser
 
                     tlpMain.RowStyles.RemoveAt(row);
                     tlpMain.RowCount--;
+
+                    slblData.Text = $"NOTAM-i za: {nos.LastSearch} | {tlpMain.RowCount} NOTAM{(tlpMain.RowCount == 1 ? "" : "-a")}";
                 }
             }
             else

@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace NOTAM_Browser
 {
-    public partial class frmSettings: Form
+    public partial class frmSettings : Form
     {
         public frmSettings()
         {
@@ -56,7 +56,7 @@ namespace NOTAM_Browser
         {
             DialogResult dr = MessageBox.Show("Da bi nova podešavanja radila, moraš restartovati aplikaciju. Da li želiš da se aplikacija restartuje?", "Restart", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-            if(dr == DialogResult.Yes)
+            if (dr == DialogResult.Yes)
             {
                 Application.Restart();
                 Environment.Exit(0);

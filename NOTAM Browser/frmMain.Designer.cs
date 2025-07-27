@@ -187,8 +187,8 @@
             this.nOTAMiToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.prikaziProcitaneNOTAMeToolStripMenuItem});
             this.nOTAMiToolStripMenuItem.Name = "nOTAMiToolStripMenuItem";
-            this.nOTAMiToolStripMenuItem.Size = new System.Drawing.Size(68, 20);
-            this.nOTAMiToolStripMenuItem.Text = "NOTAM-i";
+            this.nOTAMiToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
+            this.nOTAMiToolStripMenuItem.Text = "NOTAM";
             // 
             // prikaziProcitaneNOTAMeToolStripMenuItem
             // 

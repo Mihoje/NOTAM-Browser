@@ -27,7 +27,6 @@ namespace NOTAM_Browser
         {
             var results = tlpMain.Controls.Find($"txtNotam{NotamID}", false);
 
-
             if (results.Length == 0)
             {
 #if DEBUG
@@ -38,20 +37,23 @@ namespace NOTAM_Browser
 
             TextBox txt = (TextBox)results[0];
 
-            int row = tlpMain.GetRow(txt);
-
             tlpMain.Controls.Remove(txt);
 
-            tlpMain.RowStyles.RemoveAt(row);
+            if (tlpMain.RowStyles.Count > 0)
+                tlpMain.RowStyles.RemoveAt(0);
+
             tlpMain.RowCount--;
 #if DEBUG
-            Debug.WriteLine($"frmAckNotams: Removed notam {NotamID}");
+            Debug.WriteLine($"frmAckNotams: Removed notam {NotamID}. Rows { tlpMain.RowCount }. Row styles: {tlpMain.RowStyles.Count}");
 #endif
         }
 
         private void NewNotamAcknowledged(string NotamID)
         {
             addNotamRow(NotamID, nos.AcknowledgedNotams[NotamID]);
+#if DEBUG
+            Debug.WriteLine($"frmAckNotams: Added notam { NotamID }. Rows: { tlpMain.RowCount }. Row styles: {tlpMain.RowStyles.Count}");
+#endif
         }
 
         private void addNotamRow(string NotamID, string NotamText)

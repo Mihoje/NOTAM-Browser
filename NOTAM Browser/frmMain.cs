@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+#if DEBUG
+using System.Diagnostics;
+#endif
 
 namespace NOTAM_Browser
 {
@@ -227,7 +230,9 @@ namespace NOTAM_Browser
                     tlpMain.Controls.Remove(results[0]);
                     tlpMain.Controls.Remove(chk);
 
-                    tlpMain.RowStyles.RemoveAt(row);
+                    if(tlpMain.RowStyles.Count > 0)
+                        tlpMain.RowStyles.RemoveAt(0);
+
                     tlpMain.RowCount--;
 
                     slblData.Text = $"NOTAM-i za: {nos.LastSearch} | {tlpMain.RowCount} NOTAM{(tlpMain.RowCount == 1 ? "" : "-a")}";

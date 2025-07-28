@@ -53,6 +53,8 @@ namespace NOTAM_Browser
 #if DEBUG
             Debug.WriteLine($"frmMap: Latest map used from settings: {mapProviderName}");
 #endif
+            gMapControl1.CacheLocation = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "gmap_cache");
+
             if (mapProviders.ContainsKey(mapProviderName))
             {
                 cmbProvider.SelectedValue = mapProviders[mapProviderName];

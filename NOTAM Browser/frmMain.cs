@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using System.Runtime.Remoting.Contexts;
+using System.Text.RegularExpressions;
+
+
 #if DEBUG
 using System.Diagnostics;
 #endif
@@ -15,6 +19,8 @@ namespace NOTAM_Browser
         private readonly Notams nos;
         private Font notamFont;
         private readonly frmAckNotams frmAckNotams;
+        private readonly frmMap mapForm;
+        private string notamIdClicked;
 
         public frmMain()
         {
@@ -32,6 +38,9 @@ namespace NOTAM_Browser
 
             nos = new Notams();
             frmAckNotams = new frmAckNotams(nos);
+            mapForm = new frmMap(nos);
+
+            notamIdClicked = string.Empty;
 
             nos.NotamAcknowledged += NewNotamAcknowledged;
             nos.NotamUnacknowledged += NewNotamUnacknowledged;
@@ -70,7 +79,7 @@ namespace NOTAM_Browser
 
         private void SetTextBoxHeights()
         {
-            foreach (var txt in tlpMain.Controls.OfType<TextBox>())
+            foreach (var txt in tlpMain.Controls.OfType<RichTextBox>())
             {
                 txt.Font = notamFont;
 
@@ -92,18 +101,20 @@ namespace NOTAM_Browser
 
                 string notamText = NormalizeNewLines(pair.Value);
 
+                var coordinates = NotamParser.ParseCoordinates(notamText);
+
                 CheckBox chk = new CheckBox()
                 {
                     Name = $"chkNotam{pair.Key}",
                     Checked = nos.AcknowledgedNotams.ContainsKey(pair.Key)
                 };
 
-                TextBox txt = new ScrollTransparentTextBox()
+                RichTextBox txt = new ScrollTransparentTextBox()
                 {
                     Name = $"txtNotam{pair.Key}",
-                    Text = NormalizeNewLines(notamText),
+                    Text = notamText,
                     WordWrap = false,
-                    ScrollBars = ScrollBars.Horizontal,
+                    ScrollBars = RichTextBoxScrollBars.Horizontal,//ScrollBars.Horizontal,
                     Multiline = true,
                     ReadOnly = true,
                     ForeColor = nos.AcknowledgedNotams.ContainsKey(pair.Key) ? Color.Gray : DefaultForeColor,
@@ -112,7 +123,27 @@ namespace NOTAM_Browser
                     Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
                 };
 
+                foreach (var c in coordinates)
+                {
+                    if (string.IsNullOrEmpty(c.ConvertedString)) continue;
+
+                    if (c.Index < 0 || c.Index >= notamText.Length) continue;
+
+                    string temp = txt.Text.Substring(0, c.Index);
+
+                    int diff = temp.Length - temp.Replace("\n", "").Length;
+
+                    txt.SelectionStart = c.Index - diff;
+                    txt.SelectionLength = c.ConvertedStringLength;
+                    //txt.SelectionColor = Color.Green;
+                    txt.SelectionFont = new Font(txt.Font, FontStyle.Underline);
+                }
+
+                txt.SelectionStart = 0;
+                txt.SelectionLength = 0;
+
                 chk.CheckedChanged += Chk_CheckedChanged;
+                txt.MouseDown += Txt_Click;
 
                 tlpMain.RowStyles.Add(new RowStyle(SizeType.AutoSize));
                 tlpMain.RowCount += 1;
@@ -141,6 +172,23 @@ namespace NOTAM_Browser
 
         #region "Event Handlers"
 
+        private void Txt_Click(object sender, MouseEventArgs e)
+        {
+#if DEBUG
+            Debug.WriteLine($"frmMain: Txt_Click {e.Button}");
+#endif
+            if (e.Button == MouseButtons.Right)
+            {
+                if (!(sender is RichTextBox)) return;
+                RichTextBox txt = (RichTextBox)sender;
+                if (!txt.Name.StartsWith("txtNotam")) return;
+
+                notamIdClicked = txt.Name.Substring(8); // remove "txtNotam" from the start
+
+                cmsNotam.Show(Cursor.Position);
+            }
+        }
+
         private void NewNotamUnacknowledged(string NotamID)
         {
 #if DEBUG
@@ -156,7 +204,7 @@ namespace NOTAM_Browser
                 return;
             }
 
-            if (!(results[0] is TextBox))
+            if (!(results[0] is RichTextBox))
             {
 #if DEBUG
                 Debug.WriteLine($"frmMain: Got new notam unack event but txtNotam{NotamID} is not a TextBox!? [{NotamID}]");
@@ -164,7 +212,7 @@ namespace NOTAM_Browser
                 return;
             }
 
-            TextBox txt = (TextBox)results[0];
+            RichTextBox txt = (RichTextBox)results[0];
 
             txt.ForeColor = DefaultForeColor;
         }
@@ -184,7 +232,7 @@ namespace NOTAM_Browser
                 return;
             }
 
-            if (!(results[0] is TextBox))
+            if (!(results[0] is RichTextBox))
             {
 #if DEBUG
                 Debug.WriteLine($"frmMain: Got new notam ack event but txtNotam{NotamID} is not a TextBox!? [{NotamID}]");
@@ -192,7 +240,7 @@ namespace NOTAM_Browser
                 return;
             }
 
-            TextBox txt = (TextBox)results[0];
+            RichTextBox txt = (RichTextBox)results[0];
 
             txt.ForeColor = Color.Gray;
             txt.BackColor = txt.BackColor;
@@ -351,8 +399,23 @@ namespace NOTAM_Browser
             }
         }
 
+
         #endregion
 
+        private void mapaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            mapForm.Show();
+        }
 
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            mapForm.ClosingApp();
+            //Environment.Exit(0);
+        }
+
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            mapForm.DrawNotam(notamIdClicked);
+        }
     }
 }

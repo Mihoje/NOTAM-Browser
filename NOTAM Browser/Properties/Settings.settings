@@ -17,5 +17,17 @@
     <Setting Name="notamAft" Type="System.String" Scope="User">
       <Value Profile="(Default)">&lt;/PRE&gt;</Value>
     </Setting>
+    <Setting Name="mapyApiKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="latestMapUsed" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="lastMapPosition" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="lastMapZoom" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

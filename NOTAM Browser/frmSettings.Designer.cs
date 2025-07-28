@@ -39,12 +39,14 @@
             this.txtNotamAft = new System.Windows.Forms.TextBox();
             this.lblStaticWarning = new System.Windows.Forms.Label();
             this.btnReset = new System.Windows.Forms.Button();
+            this.lblStaticMapyAPI = new System.Windows.Forms.Label();
+            this.txtMapyApiKey = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // btnSave
             // 
             this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSave.Location = new System.Drawing.Point(336, 151);
+            this.btnSave.Location = new System.Drawing.Point(336, 182);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 0;
@@ -131,7 +133,7 @@
             // btnReset
             // 
             this.btnReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnReset.Location = new System.Drawing.Point(123, 151);
+            this.btnReset.Location = new System.Drawing.Point(123, 182);
             this.btnReset.Name = "btnReset";
             this.btnReset.Size = new System.Drawing.Size(75, 23);
             this.btnReset.TabIndex = 10;
@@ -139,11 +141,29 @@
             this.btnReset.UseVisualStyleBackColor = true;
             this.btnReset.Click += new System.EventHandler(this.btnReset_Click);
             // 
+            // lblStaticMapyAPI
+            // 
+            this.lblStaticMapyAPI.AutoSize = true;
+            this.lblStaticMapyAPI.Location = new System.Drawing.Point(44, 152);
+            this.lblStaticMapyAPI.Name = "lblStaticMapyAPI";
+            this.lblStaticMapyAPI.Size = new System.Drawing.Size(73, 13);
+            this.lblStaticMapyAPI.TabIndex = 12;
+            this.lblStaticMapyAPI.Text = "Mapy API key";
+            // 
+            // txtMapyApiKey
+            // 
+            this.txtMapyApiKey.Location = new System.Drawing.Point(123, 149);
+            this.txtMapyApiKey.Name = "txtMapyApiKey";
+            this.txtMapyApiKey.Size = new System.Drawing.Size(288, 20);
+            this.txtMapyApiKey.TabIndex = 11;
+            // 
             // frmSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(419, 182);
+            this.ClientSize = new System.Drawing.Size(419, 213);
+            this.Controls.Add(this.lblStaticMapyAPI);
+            this.Controls.Add(this.txtMapyApiKey);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.lblStaticWarning);
             this.Controls.Add(this.lblStaticNotamAft);
@@ -181,5 +201,7 @@
         private System.Windows.Forms.TextBox txtNotamAft;
         private System.Windows.Forms.Label lblStaticWarning;
         private System.Windows.Forms.Button btnReset;
+        private System.Windows.Forms.Label lblStaticMapyAPI;
+        private System.Windows.Forms.TextBox txtMapyApiKey;
     }
 }

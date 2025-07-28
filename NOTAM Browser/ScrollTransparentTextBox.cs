@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace NOTAM_Browser
 {
-    class ScrollTransparentTextBox : TextBox
+    class ScrollTransparentTextBox : RichTextBox
     {
         [DllImport("user32.dll")]
         static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);

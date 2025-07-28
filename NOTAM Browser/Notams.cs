@@ -6,8 +6,9 @@ using System.Diagnostics;
 #endif
 using System.IO;
 using System.Net.Http;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+//using System.Text.Json;
+//using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,9 +19,9 @@ namespace NOTAM_Browser
     {
         // private vars
         private const string FILENAME = "notams.json";
-        private readonly string NOTAMQUERY = $"{Settings.Default.urlPre}{{0}}{Settings.Default.urlAft}";
-        private readonly string NOTAM_DECODE_PRE = Settings.Default.notamPre;
-        private readonly string NOTAM_DECODE_AFT = Settings.Default.notamAft;
+        private readonly string NOTAMQUERY = $"{Settings.Default.urlPre ?? ""}{{0}}{Settings.Default.urlAft ?? ""}";
+        private readonly string NOTAM_DECODE_PRE = Settings.Default.notamPre ?? "";
+        private readonly string NOTAM_DECODE_AFT = Settings.Default.notamAft ?? "";
 
         //private properties
         private static string fullFileName { get { return Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), FILENAME); } }
@@ -45,7 +46,7 @@ namespace NOTAM_Browser
 
             if (File.Exists(fullFileName))
             {
-                nd = JsonSerializer.Deserialize<NotamsData>(File.ReadAllText(fullFileName));
+                nd = JsonConvert.DeserializeObject<NotamsData>(File.ReadAllText(fullFileName));
             }
             else
                 nd = new NotamsData();
@@ -60,8 +61,8 @@ namespace NOTAM_Browser
 
         public Dictionary<string, string> GetNotamsForDate(DateTime Date)
         {
-            Regex rStartTime = new Regex(@"B\) [0-9]* ");
-            Regex rEndTime = new Regex(@"C\) [0-9]* ");
+            Regex rStartTime = new Regex(@"B\) [0-9]+");
+            Regex rEndTime = new Regex(@"C\) ([0-9]+|PERM)");
             Match m;
 
             Date = Date.Date;
@@ -80,6 +81,12 @@ namespace NOTAM_Browser
                 {
                     notamValidityStr[0] = m.Value.Substring(2).Trim();
                 }
+#if DEBUG
+                else
+                {
+                    Debug.WriteLine($"Notams: Invalid start date format in NOTAM {notam.Key}: {notam.Value}");
+                }
+#endif
 
                 m = rEndTime.Match(notam.Value);
 
@@ -87,6 +94,12 @@ namespace NOTAM_Browser
                 {
                     notamValidityStr[1] = m.Value.Substring(2).Trim();
                 }
+#if DEBUG
+                else
+                {
+                    Debug.WriteLine($"Notams: Invalid end date format in NOTAM {notam.Key}: {notam.Value}");
+                }
+#endif
 
                 if (notamValidityStr[1] == "PERM") notamValidityStr[1] = "9901010000"; //If the notam is PERM, set the end date at 2099
 
@@ -104,9 +117,19 @@ namespace NOTAM_Browser
 
                     bool success = true;
 
-                    for (int j = 0; j < 5; j++) //parsing data, each 2 chars long 
+                    if (notamValidityStr[i].Length == 10)
                     {
-                        success &= int.TryParse(notamValidityStr[i].Substring(j * 2, 2), out parsed[j]);
+                        for (int j = 0; j < 5; j++) //parsing data, each 2 chars long 
+                        {
+                            success &= int.TryParse(notamValidityStr[i].Substring(j * 2, 2), out parsed[j]);
+                        }
+                    }
+                    else
+                    {
+#if DEBUG
+                        Debug.WriteLine($"Notams: Invalid date format in NOTAM {notam.Key}: {notamValidityStr[i]}");
+#endif
+                        success = false;
                     }
 
                     if (!success)
@@ -220,8 +243,8 @@ namespace NOTAM_Browser
             nd.LatestNotamsTime = this.CurrentNotamsTime;
             nd.LastSearch = this.LastSearch;
 
-            //string fileText = JsonConvert.SerializeObject(nd);
-            string fileText = JsonSerializer.Serialize<NotamsData>(nd);
+            string fileText = JsonConvert.SerializeObject(nd);
+            //string fileText = JsonSerializer.Serialize<NotamsData>(nd);
             try
             {
                 File.WriteAllText(fullFileName, fileText);
@@ -241,15 +264,16 @@ namespace NOTAM_Browser
 
         public class NotamsData
         {
-            [JsonPropertyName("acknowledged_notams")]
+            [JsonProperty("acknowledged_notams")]
             public Dictionary<string, string> AcknowledgedNotams { get; set; }
 
-            [JsonPropertyName("latest_notams")]
+            [JsonProperty("latest_notams")]
             public Dictionary<string, string> LatestNotams { get; set; }
 
-            [JsonPropertyName("latest_notams_time")]
+            [JsonProperty("latest_notams_time")]
             public DateTime LatestNotamsTime { get; set; }
-            [JsonPropertyName("last_search")]
+
+            [JsonProperty("last_search")]
             public string LastSearch { get; set; }
         }
     }

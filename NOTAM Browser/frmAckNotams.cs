@@ -35,7 +35,7 @@ namespace NOTAM_Browser
                 return;
             }
 
-            TextBox txt = (TextBox)results[0];
+            RichTextBox txt = (RichTextBox)results[0];
 
             tlpMain.Controls.Remove(txt);
 
@@ -66,7 +66,7 @@ namespace NOTAM_Browser
                 Name = $"txtNotam{NotamID}",
                 Text = NormalizeNewLines(NotamText),
                 WordWrap = false,
-                ScrollBars = ScrollBars.Horizontal,
+                ScrollBars = RichTextBoxScrollBars.Horizontal,//ScrollBars.Horizontal,
                 Multiline = true,
                 ReadOnly = true,
                 Font = Properties.Settings.Default.notamFont ?? new Font("Consolas", 10),

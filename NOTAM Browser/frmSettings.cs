@@ -18,10 +18,11 @@ namespace NOTAM_Browser
 
         private void loadData()
         {
-            txtUrlPre.Text = Settings.Default.urlPre;
-            txtUrlAft.Text = Settings.Default.urlAft;
-            txtNotamPre.Text = Settings.Default.notamPre;
-            txtNotamAft.Text = Settings.Default.notamAft;
+            txtUrlPre.Text = Settings.Default.urlPre ?? "";
+            txtUrlAft.Text = Settings.Default.urlAft ?? "";
+            txtNotamPre.Text = Settings.Default.notamPre ?? "";
+            txtNotamAft.Text = Settings.Default.notamAft ?? "";
+            txtMapyApiKey.Text = Settings.Default.mapyApiKey ?? "";
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -30,6 +31,7 @@ namespace NOTAM_Browser
             Settings.Default.urlAft = txtUrlAft.Text;
             Settings.Default.notamPre = txtNotamPre.Text;
             Settings.Default.notamAft = txtNotamAft.Text;
+            Settings.Default.mapyApiKey = txtMapyApiKey.Text;
 
             Settings.Default.Save();
             showRestartNotification();
@@ -46,6 +48,7 @@ namespace NOTAM_Browser
                 Settings.Default.urlAft = (string)Settings.Default.Properties["urlAft"].DefaultValue;
                 Settings.Default.notamPre = (string)Settings.Default.Properties["notamPre"].DefaultValue;
                 Settings.Default.notamAft = (string)Settings.Default.Properties["notamAft"].DefaultValue;
+                Settings.Default.mapyApiKey = (string)Settings.Default.Properties["mapyApiKey"].DefaultValue;
                 Settings.Default.Save();
                 loadData();
                 showRestartNotification();

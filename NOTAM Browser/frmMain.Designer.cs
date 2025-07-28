@@ -44,14 +44,18 @@
             this.menuMain = new System.Windows.Forms.MenuStrip();
             this.nOTAMiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prikaziProcitaneNOTAMeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mapaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.podesavanjaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fontToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.promeniPodešavanjaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chkFilterAck = new System.Windows.Forms.CheckBox();
             this.tooltipDesignators = new System.Windows.Forms.ToolTip(this.components);
+            this.cmsNotam = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tsmItemShowOnMap = new System.Windows.Forms.ToolStripMenuItem();
             this.grpFilters.SuspendLayout();
             this.stsStripMain.SuspendLayout();
             this.menuMain.SuspendLayout();
+            this.cmsNotam.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblStaticIcaoDesignators
@@ -185,7 +189,8 @@
             // nOTAMiToolStripMenuItem
             // 
             this.nOTAMiToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.prikaziProcitaneNOTAMeToolStripMenuItem});
+            this.prikaziProcitaneNOTAMeToolStripMenuItem,
+            this.mapaToolStripMenuItem});
             this.nOTAMiToolStripMenuItem.Name = "nOTAMiToolStripMenuItem";
             this.nOTAMiToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
             this.nOTAMiToolStripMenuItem.Text = "NOTAM";
@@ -196,6 +201,13 @@
             this.prikaziProcitaneNOTAMeToolStripMenuItem.Size = new System.Drawing.Size(216, 22);
             this.prikaziProcitaneNOTAMeToolStripMenuItem.Text = "Prikaži pročitane NOTAM-e";
             this.prikaziProcitaneNOTAMeToolStripMenuItem.Click += new System.EventHandler(this.prikaziProcitaneNOTAMeToolStripMenuItem_Click);
+            // 
+            // mapaToolStripMenuItem
+            // 
+            this.mapaToolStripMenuItem.Name = "mapaToolStripMenuItem";
+            this.mapaToolStripMenuItem.Size = new System.Drawing.Size(216, 22);
+            this.mapaToolStripMenuItem.Text = "Mapa...";
+            this.mapaToolStripMenuItem.Click += new System.EventHandler(this.mapaToolStripMenuItem_Click);
             // 
             // podesavanjaToolStripMenuItem
             // 
@@ -238,6 +250,20 @@
             this.tooltipDesignators.IsBalloon = true;
             this.tooltipDesignators.ReshowDelay = 100;
             // 
+            // cmsNotam
+            // 
+            this.cmsNotam.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsmItemShowOnMap});
+            this.cmsNotam.Name = "cmsNotam";
+            this.cmsNotam.Size = new System.Drawing.Size(181, 48);
+            // 
+            // tsmItemShowOnMap
+            // 
+            this.tsmItemShowOnMap.Name = "tsmItemShowOnMap";
+            this.tsmItemShowOnMap.Size = new System.Drawing.Size(180, 22);
+            this.tsmItemShowOnMap.Text = "Prikaži na mapi...";
+            this.tsmItemShowOnMap.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -257,6 +283,7 @@
             this.MinimumSize = new System.Drawing.Size(642, 377);
             this.Name = "frmMain";
             this.Text = "NOTAMI";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmMain_FormClosing);
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.grpFilters.ResumeLayout(false);
             this.grpFilters.PerformLayout();
@@ -264,6 +291,7 @@
             this.stsStripMain.PerformLayout();
             this.menuMain.ResumeLayout(false);
             this.menuMain.PerformLayout();
+            this.cmsNotam.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -290,6 +318,9 @@
         private System.Windows.Forms.CheckBox chkFilterAck;
         private System.Windows.Forms.ToolStripMenuItem promeniPodešavanjaToolStripMenuItem;
         private System.Windows.Forms.ToolTip tooltipDesignators;
+        private System.Windows.Forms.ToolStripMenuItem mapaToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip cmsNotam;
+        private System.Windows.Forms.ToolStripMenuItem tsmItemShowOnMap;
     }
 }
 

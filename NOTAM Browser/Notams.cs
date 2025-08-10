@@ -6,8 +6,6 @@ using System.Diagnostics;
 #endif
 using System.IO;
 using System.Net.Http;
-//using System.Text.Json;
-//using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -15,6 +13,13 @@ using System.Windows.Forms;
 
 namespace NOTAM_Browser
 {
+    /// <summary>
+    /// Represents a collection of NOTAMs (Notices to Airmen) and provides functionality for managing, filtering,  and
+    /// retrieving NOTAMs from local storage or the internet.
+    /// </summary>
+    /// <remarks>This class allows users to manage NOTAMs by acknowledging or unacknowledging them, filtering
+    /// them by date, and retrieving them from an external source. It also supports saving and loading NOTAM data to
+    /// and from a local file. Events are provided to notify when NOTAMs are acknowledged or unacknowledged.</remarks>
     public class Notams
     {
         // private vars
@@ -40,6 +45,7 @@ namespace NOTAM_Browser
         public event NotamAcknowledgedHandler NotamAcknowledged;
         public event NotamUnacknowledgedHandler NotamUnacknowledged;
 
+        
         public Notams()
         {
             NotamsData nd;
@@ -139,7 +145,7 @@ namespace NOTAM_Browser
                         break;
                     }
 
-                    notamValidity[i] = new DateTime(parsed[0] + 2000, parsed[1], parsed[2], parsed[3], parsed[4], 0);
+                    notamValidity[i] = new DateTime(parsed[0] + 2000, parsed[1], parsed[2], 0, 0, 0);
                 }
 
                 if (Date >= notamValidity[0] && Date <= notamValidity[1])

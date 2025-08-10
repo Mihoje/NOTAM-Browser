@@ -19,6 +19,12 @@ namespace NOTAM_Browser
     RegexOptions.Compiled);
 
 
+        /// <summary>
+        /// Determines whether the provided NOTAM text is related to airspace.
+        /// </summary>
+        /// <param name="notamText">The text of the NOTAM to analyze. Cannot be null or empty.</param>
+        /// <returns><see langword="true"/> if the NOTAM text contains information related to airspace; otherwise, <see
+        /// langword="false"/>.</returns>
         private static bool IsNotamAboutAirsapce(string notamText)
         {
             Regex r = new Regex(@"Q\) *[A-Z]{4}\/Q([A].|.[A])");
@@ -27,6 +33,19 @@ namespace NOTAM_Browser
             return m.Success;
         }
 
+        /// <summary>
+        /// Parses a NOTAM text containing coordinate data and extracts a list of latitude and longitude points.
+        /// </summary>
+        /// <remarks>This method supports multiple coordinate formats, including degrees, minutes, and
+        /// seconds, as well as decimal degrees. If a radius is specified within the input, the method generates a
+        /// circular area around the last parsed coordinate.</remarks>
+        /// <param name="input">The input string containing coordinate information. This may include various formats of latitude and
+        /// longitude data.</param>
+        /// <param name="raw">A boolean value indicating whether the input should be processed in its entirety or only the E) part of the NOTAM. 
+        /// If <see langword="true"/>, the entire input is parsed; otherwise, only the portion between
+        /// specific markers is considered.</param>
+        /// <returns>A list of <see cref="LatLon"/> objects representing the parsed coordinates. Returns an empty list if no
+        /// valid coordinates are found.</returns>
         public static List<LatLon> ParseCoordinates(string input, bool raw = false)
         {
             if(!IsNotamAboutAirsapce(input) && !raw) return new List<LatLon>();
@@ -110,6 +129,19 @@ namespace NOTAM_Browser
             return result;
         }
 
+        /// <summary>
+        /// Converts geographic coordinates from degrees, minutes, seconds, and fractional values  into a decimal degree
+        /// representation.
+        /// </summary>
+        /// <param name="deg">The degrees component of the coordinate. Must be a valid numeric string.</param>
+        /// <param name="min">The minutes component of the coordinate. Can be null or empty if not applicable.</param>
+        /// <param name="sec">The seconds component of the coordinate. Can be null or empty if not applicable.</param>
+        /// <param name="fraction">The fractional component of the coordinate. Represents a decimal fraction of the smallest unit  provided
+        /// (seconds, minutes, or degrees). Can be null or empty if not applicable.</param>
+        /// <param name="hemisphere">The hemisphere indicator. Must be "N", "S", "E", or "W". "S" and "W" result in negative values  for the
+        /// decimal degree representation.</param>
+        /// <returns>A double representing the coordinate in decimal degrees. Negative values indicate coordinates  in the
+        /// southern or western hemispheres.</returns>
         private static double ToDecimalDegrees(string deg, string min, string sec, string fraction, string hemisphere)
         {
             double degrees = double.Parse(deg);
@@ -133,6 +165,18 @@ namespace NOTAM_Browser
             return result;
         }
 
+        /// <summary>
+        /// Generates a list of geographic coordinates representing a circle around a specified center point.
+        /// </summary>
+        /// <remarks>The generated circle is an approximation based on the Earth's curvature, assuming a
+        /// spherical Earth model. The accuracy of the coordinates may vary slightly depending on the radius and the
+        /// number of points.</remarks>
+        /// <param name="center">The center point of the circle, specified as a <see cref="LatLon"/> object.</param>
+        /// <param name="radiusMeters">The radius of the circle in meters. Must be a positive value.</param>
+        /// <param name="points">The number of points to generate along the circumference of the circle. Defaults to 36. Higher values result
+        /// in a smoother circle.</param>
+        /// <returns>A list of <see cref="LatLon"/> objects representing the geographic coordinates of the circle's
+        /// circumference. The list contains <paramref name="points"/> evenly spaced coordinates.</returns>
         private static List<LatLon> GenerateCircle(LatLon center, double radiusMeters, int points = 36)
         {
             var coords = new List<LatLon>();
@@ -159,6 +203,18 @@ namespace NOTAM_Browser
             return coords;
         }
 
+        /// <summary>
+        /// Extracts a radius value in meters from a given NOTAM text string.
+        /// </summary>
+        /// <remarks>Supported units are: <list type="bullet"> <item><description><c>NM</c>: Nautical
+        /// miles, converted to meters.</description></item> <item><description><c>KM</c>: Kilometers, converted to
+        /// meters.</description></item> <item><description><c>M</c>: Meters, returned as-is.</description></item>
+        /// </list> The method performs a case-insensitive match for the unit and supports both dot and comma as decimal
+        /// separators.</remarks>
+        /// <param name="input">The input string containing a radius value and its unit. The expected format is a numeric value  followed by
+        /// a unit (e.g., "10 KM", "5.5 NM", or "1000 M").</param>
+        /// <returns>The radius value in meters, or <see langword="null"/> if the input string does not contain a valid  radius
+        /// value or unit.</returns>
         public static double? ExtractRadiusInMeters(string input)
         {
             var radiusMatch = Regex.Match(input, @"\b(\d+(?:[.,]\d+)?)\s*(NM|KM|M)\b", RegexOptions.IgnoreCase);
@@ -181,6 +237,15 @@ namespace NOTAM_Browser
             }
         }
 
+        /// <summary>
+        /// Converts a list of latitude and longitude coordinates into a list of map-compatible points.
+        /// </summary>
+        /// <remarks>This method transforms geographic coordinates into a format suitable for mapping
+        /// applications. Each <see cref="LatLon"/> in the input list is converted to a <see cref="PointLatLng"/>
+        /// object.</remarks>
+        /// <param name="input">A list of <see cref="LatLon"/> objects representing latitude and longitude coordinates.</param>
+        /// <returns>A list of <see cref="PointLatLng"/> objects, where each point corresponds to the latitude and longitude of
+        /// the input coordinates.</returns>
         public static List<PointLatLng> ConvertCoordinatesForMap(List<LatLon> input)
         {
             return input.Select(ll => new PointLatLng(ll.Latitude, ll.Longitude)).ToList();
@@ -199,6 +264,17 @@ namespace NOTAM_Browser
             return GetNotamQCoordinate(nos.CurrentNotams[NotamID]);
         }
 
+        /// <summary>
+        /// Extracts the latitude and longitude coordinates from the "Q)" section of a NOTAM text.
+        /// </summary>
+        /// <remarks>This method parses the "Q)" section of the NOTAM text to extract the coordinates. The
+        /// "Q)" section is expected to follow a specific format, and the coordinates are typically located in the
+        /// seventh part of the section. If the format is invalid or no coordinates are found, the method returns <see
+        /// langword="null"/>.</remarks>
+        /// <param name="notamText">The NOTAM text containing the "Q)" section. This parameter must not be null or empty.</param>
+        /// <returns>A <see cref="Tuple{T1, T2}"/> containing the latitude and longitude as <see cref="double"/> values. Returns
+        /// <see langword="null"/> if the "Q)" section is missing, improperly formatted, or does not contain valid
+        /// coordinates.</returns>
         public static Tuple<double, double> GetNotamQCoordinate(string notamText)
         {
             int startIndex = notamText.IndexOf("Q)");
@@ -241,8 +317,42 @@ namespace NOTAM_Browser
             longitude = c[0].Longitude;
             return new Tuple<double, double>(latitude, longitude);
         }
+
+        /// <summary>
+        /// Attempts to extract the NOTAM zone name from the provided NOTAM text about a zone.
+        /// </summary>
+        /// <remarks>This method searches for the zone name within the NOTAM text by identifying the
+        /// section enclosed in parentheses following the "E)" marker. If the required markers or parentheses are not
+        /// present, the method returns <see langword="null"/>.</remarks>
+        /// <param name="NotamText">The text of the NOTAM from which the zone name will be extracted. Cannot be null or empty.</param>
+        /// <returns>The extracted zone name as a string, or <see langword="null"/> if the zone name cannot be found.</returns>
+        public static string GetNotamZoneName(string NotamText)
+        {
+            if (string.IsNullOrEmpty(NotamText)) return null;
+
+            int startIndex = NotamText.IndexOf("E)");
+
+            if(startIndex == -1) return null;
+
+            startIndex = NotamText.IndexOf('(', startIndex);
+
+            if (startIndex == -1) return null;
+
+            int endIndex = NotamText.IndexOf(')', startIndex);
+
+            if (endIndex == -1) return null;
+
+            string zoneName = NotamText.Substring(startIndex + 1, endIndex - startIndex - 1).Trim();
+
+            return zoneName;
+        }
     }
 
+    /// <summary>
+    /// Represents a geographical coordinate with latitude and longitude values.
+    /// </summary>
+    /// <remarks>The <see cref="LatLon"/> class provides properties to store latitude and longitude values, 
+    /// as well as additional derived information such as a converted string representation and its length.</remarks>
     internal class LatLon
     {
         public double Latitude { get; set; }

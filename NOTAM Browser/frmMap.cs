@@ -91,76 +91,166 @@ namespace NOTAM_Browser
             gMapControl1.Position = new GMap.NET.PointLatLng(double.Parse(coords[0]), double.Parse(coords[1]));
             gMapControl1.Zoom = Settings.Default.lastMapZoom;
 
+            this.LoadPolys();
+
+            UpdateStatusBar();
+        }
+
+        #region "Loading Polygons"
+        private void createOverlayForZone(ZoneData zd)
+        {
+            List<GMap.NET.PointLatLng> points = new List<GMap.NET.PointLatLng>();
+
+            foreach (var coord in zd.Points)
+            {
+                if (coord.Count != 2)
+                {
+#if DEBUG
+                    Debug.WriteLine($"frmMap: Invalid coordinate format in zone {zd.UID}: {string.Join(",", coord)}");
+#endif
+                    continue; // Skip invalid coordinates
+                }
+
+                points.Add(new GMap.NET.PointLatLng(coord[0], coord[1]));
+            }
+            // Draw the polygon on the map
+            GMap.NET.WindowsForms.GMapPolygon polygon = new GMap.NET.WindowsForms.GMapPolygon(points, zd.UID);
+            polygon.Fill = Brushes.Transparent; // No fill color
+            Color c;
+            if (zd.Color.Count == 4)
+            {
+                c = Color.FromArgb(zd.Color[0], zd.Color[1], zd.Color[2], zd.Color[3]);
+            }
+            else
+            {
+                c = Color.FromArgb(255, 255, 255, 128); // Default to black if color is not specified correctly
+            }
+
+            polygon.Stroke = new Pen(c, 2); // Red border
+
+            var o = new GMap.NET.WindowsForms.GMapOverlay(zd.UID);
+
+            o.Polygons.Add(polygon);
+
+            gMapControl1.Overlays.Add(o);
+
+            o.IsVisibile = zd.Visible;
+        }
+
+        public void LoadPolys()
+        {
             var polys = MapManager.LoadPolys();
 
-            if (polys != null)
+            var overlaysToDelete = gMapControl1.Overlays.ToList();
+
+            if (polys != null && polys.Groups != null)
             {
                 #region "NEW LIST CODE"
                 foreach (var group in polys.Groups)
                 {
-                    addTabForGroup(group.Key);
-                    var checkListBox = GetCheckedListForGroup(group.Key);
+                    if (group.Value == null) { continue; }
+
+                    var checkListBox = GetCheckedListForGroup(group.Key, true);
 
                     foreach (var poly in group.Value.Polygons)
                     {
-                        if (poly.Value == null || poly.Value.Points == null) continue;
-
-                        checkListBox.Items.Add(new Tuple<string, string>(poly.Value.UID, poly.Key), poly.Value.Visible);
-                        List<GMap.NET.PointLatLng> points = new List<GMap.NET.PointLatLng>();
-
-                        foreach (var coord in poly.Value.Points)
+                        if (poly.Value == null || poly.Value.Points == null)
                         {
-                            if (coord.Count != 2)
+                            string uid = $"{group.Key}_{poly.Key}";
+
+                            var overlay = gMapControl1.Overlays.FirstOrDefault(ov => ov.Id == uid);
+
+                            if(overlay != null)
                             {
-#if DEBUG
-                                Debug.WriteLine($"frmMap: Invalid coordinate format in zone {poly.Value.UID}: {string.Join(",", coord)}");
-#endif
-                                continue; // Skip invalid coordinates
+                                overlaysToDelete.Remove(overlay);
+                                gMapControl1.Overlays.Remove(overlay);
                             }
 
-                            points.Add(new GMap.NET.PointLatLng(coord[0], coord[1]));
+                            int ind = checkListBox.Items.IndexOf(new Tuple<string, string>(poly.Value.UID, poly.Key));
+
+                            if(ind > -1)
+                            {
+                                checkListBox.Items.RemoveAt(ind);
+                            }
+
+                            continue;
                         }
-                        // Draw the polygon on the map
-                        GMap.NET.WindowsForms.GMapPolygon polygon = new GMap.NET.WindowsForms.GMapPolygon(points, poly.Value.UID);
-                        polygon.Fill = Brushes.Transparent; // No fill color
-                        Color c;
-                        if (poly.Value.Color.Count == 4)
+
+                        int itemIndex = checkListBox.Items.IndexOf(new Tuple<string, string>(poly.Value.UID, poly.Key));
+
+                        if (itemIndex > -1) //Item exists in the list
                         {
-                            c = Color.FromArgb(poly.Value.Color[0], poly.Value.Color[1], poly.Value.Color[2], poly.Value.Color[3]);
+                            checkListBox.SetItemChecked(itemIndex, poly.Value.Visible);
+
+                            var overlay = gMapControl1.Overlays.FirstOrDefault(ov => ov.Id == poly.Value.UID);
+
+                            if(overlay == null)
+                            {
+                                createOverlayForZone(poly.Value);
+                            }
+                            else
+                            {
+                                overlay.IsVisibile = poly.Value.Visible;
+                                overlaysToDelete.Remove(overlay);
+                            }
                         }
                         else
                         {
-                            c = Color.FromArgb(255, 255, 255, 128); // Default to black if color is not specified correctly
+                            checkListBox.Items.Add(new Tuple<string, string>(poly.Value.UID, poly.Key), poly.Value.Visible);
+                            createOverlayForZone(poly.Value);
                         }
-
-                        polygon.Stroke = new Pen(c, 2); // Red border
-
-                        var o = new GMap.NET.WindowsForms.GMapOverlay(poly.Value.UID);
-
-                        o.Polygons.Add(polygon);
-
-                        gMapControl1.Overlays.Add(o);
-
-                        o.IsVisibile = poly.Value.Visible;
                     }
+                }
+
+                foreach (var overlay in overlaysToDelete)
+                {
+                    var parts = overlay.Id.Split('_');
+
+                    gMapControl1.Overlays.Remove(overlay);
+
+                    if (parts.Length < 2) continue;
+
+                    string uid = overlay.Id;
+                    string groupName = parts[0];
+                    string zoneName = overlay.Id.Substring(groupName.Length + 1);
+
+                    //eh
+                    var list = GetCheckedListForGroup(groupName);
+                    if(list == null)
+                    {
+#if DEBUG
+                        Debug.WriteLine($"frmMap: Couldn't find check list for group {groupName} on LoadPolys");
+#endif
+                        continue;
+                    }
+
+                    list.Items.Remove(new Tuple<string, string>(overlay.Id, zoneName));
                 }
                 #endregion
             }
             else
             {
 #if DEBUG
-                Debug.WriteLine("frmMain: No coordinates found in the JSON file.");
+                Debug.WriteLine($"frmMain: No coordinates found in the JSON file.");
 #endif
             }
 
             var notamTabList = listTabControl.Controls.Find("chk_NOTAM", true);
-            
+
             if (notamTabList.Length == 0)
             {
                 addTabForGroup("NOTAM");
             }
 
-            UpdateStatusBar();
+            refreshMap();
+        }
+        #endregion
+
+        private void refreshMap()
+        {
+            // TODO: ne pojavljuje se odmah, treba da se osveži mapa. ovo radi
+            gMapControl1.Zoom--;
+            gMapControl1.Zoom++;
         }
 
         private void addTabForGroup(string groupName)
@@ -283,9 +373,7 @@ namespace NOTAM_Browser
 
             gMapControl1.Overlays.Add(overlay);
 
-            // TODO: ne pojavljuje se odmah, treba da se osveži mapa. ovo radi
-            gMapControl1.Zoom--;
-            gMapControl1.Zoom++;
+            refreshMap();
 
             //chkMapElements.Items.Add(notamName, true);
             chkList.Items.Add(new Tuple<string, string>(UID, notamName), true);
@@ -603,12 +691,17 @@ namespace NOTAM_Browser
 
                                 o.Polygons.Add(polygon);
 
+                                o.IsVisibile = z.Value.Visible;
+
+                                int index = chkList.Items.IndexOf(new Tuple<string, string>(z.Value.UID, z.Key));
+                                if(index != -1)
+                                    chkList.SetItemChecked(index, z.Value.Visible);
+
                                 gMapControl1.Overlays.Add(o);
                             }
                         }
-                        
-                        gMapControl1.Zoom++;
-                        gMapControl1.Zoom--;
+
+                        refreshMap();
 
                         MessageBox.Show("Mape su uspešno učitane i sačuvane", "Učitane mape", MessageBoxButtons.OK);
                     }
@@ -684,8 +777,13 @@ namespace NOTAM_Browser
 
             gMapControl1.Overlays.Remove(gMapControl1.Overlays.First(o => o.Id == selected.Item1));
 
-            gMapControl1.Zoom++;
-            gMapControl1.Zoom--;
+            refreshMap();
+        }
+
+        private void upravljajZonamaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmEditPolys frmEditPolys = new frmEditPolys(this);
+            frmEditPolys.ShowDialog();
         }
     }
 }

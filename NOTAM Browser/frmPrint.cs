@@ -93,7 +93,7 @@ namespace NOTAM_Browser
 #endif
                 throw ex;
             }
-            return null;
+            //return null;
         }
 
         private void btnExtend_Click(object sender, EventArgs e)

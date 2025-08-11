@@ -15,6 +15,7 @@
         {
             if (disposing && (components != null))
             {
+                this.printManager.Dispose();
                 components.Dispose();
             }
             base.Dispose(disposing);
@@ -43,16 +44,20 @@
             this.ctxDelete = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.obrišToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
+            this.menuMain = new System.Windows.Forms.MenuStrip();
+            this.zoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.upravljajZonamaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.numZoomLevel)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.ctxDelete.SuspendLayout();
+            this.menuMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // cmbProvider
             // 
             this.cmbProvider.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbProvider.FormattingEnabled = true;
-            this.cmbProvider.Location = new System.Drawing.Point(103, 9);
+            this.cmbProvider.Location = new System.Drawing.Point(103, 27);
             this.cmbProvider.Name = "cmbProvider";
             this.cmbProvider.Size = new System.Drawing.Size(171, 21);
             this.cmbProvider.TabIndex = 4;
@@ -61,7 +66,7 @@
             // lblStaticMapDropdown
             // 
             this.lblStaticMapDropdown.AutoSize = true;
-            this.lblStaticMapDropdown.Location = new System.Drawing.Point(12, 12);
+            this.lblStaticMapDropdown.Location = new System.Drawing.Point(12, 30);
             this.lblStaticMapDropdown.Name = "lblStaticMapDropdown";
             this.lblStaticMapDropdown.Size = new System.Drawing.Size(85, 13);
             this.lblStaticMapDropdown.TabIndex = 5;
@@ -70,7 +75,7 @@
             // btnLoadPolys
             // 
             this.btnLoadPolys.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLoadPolys.Location = new System.Drawing.Point(794, 9);
+            this.btnLoadPolys.Location = new System.Drawing.Point(836, 27);
             this.btnLoadPolys.Name = "btnLoadPolys";
             this.btnLoadPolys.Size = new System.Drawing.Size(102, 23);
             this.btnLoadPolys.TabIndex = 6;
@@ -80,7 +85,7 @@
             // 
             // btnPrint
             // 
-            this.btnPrint.Location = new System.Drawing.Point(435, 9);
+            this.btnPrint.Location = new System.Drawing.Point(435, 27);
             this.btnPrint.Name = "btnPrint";
             this.btnPrint.Size = new System.Drawing.Size(81, 23);
             this.btnPrint.TabIndex = 7;
@@ -90,7 +95,7 @@
             // 
             // numZoomLevel
             // 
-            this.numZoomLevel.Location = new System.Drawing.Point(380, 10);
+            this.numZoomLevel.Location = new System.Drawing.Point(380, 28);
             this.numZoomLevel.Maximum = new decimal(new int[] {
             20,
             0,
@@ -113,7 +118,7 @@
             // lblStaticZoomLevel
             // 
             this.lblStaticZoomLevel.AutoSize = true;
-            this.lblStaticZoomLevel.Location = new System.Drawing.Point(280, 12);
+            this.lblStaticZoomLevel.Location = new System.Drawing.Point(280, 30);
             this.lblStaticZoomLevel.Name = "lblStaticZoomLevel";
             this.lblStaticZoomLevel.Size = new System.Drawing.Size(94, 13);
             this.lblStaticZoomLevel.TabIndex = 9;
@@ -124,9 +129,9 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.stsZoomLevel,
             this.stsPosition});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 574);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 568);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(908, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(950, 22);
             this.statusStrip1.TabIndex = 10;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -146,10 +151,10 @@
             // 
             this.listTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.listTabControl.Location = new System.Drawing.Point(656, 42);
+            this.listTabControl.Location = new System.Drawing.Point(636, 56);
             this.listTabControl.Name = "listTabControl";
             this.listTabControl.SelectedIndex = 0;
-            this.listTabControl.Size = new System.Drawing.Size(240, 521);
+            this.listTabControl.Size = new System.Drawing.Size(302, 501);
             this.listTabControl.TabIndex = 11;
             // 
             // ctxDelete
@@ -157,12 +162,12 @@
             this.ctxDelete.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.obrišToolStripMenuItem});
             this.ctxDelete.Name = "ctxDelete";
-            this.ctxDelete.Size = new System.Drawing.Size(181, 48);
+            this.ctxDelete.Size = new System.Drawing.Size(172, 26);
             // 
             // obrišToolStripMenuItem
             // 
             this.obrišToolStripMenuItem.Name = "obrišToolStripMenuItem";
-            this.obrišToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.obrišToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
             this.obrišToolStripMenuItem.Text = "Obriši selektovano";
             this.obrišToolStripMenuItem.Click += new System.EventHandler(this.obrišToolStripMenuItem_Click);
             // 
@@ -177,7 +182,7 @@
             this.gMapControl1.GrayScaleMode = false;
             this.gMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow;
             this.gMapControl1.LevelsKeepInMemory = 5;
-            this.gMapControl1.Location = new System.Drawing.Point(12, 42);
+            this.gMapControl1.Location = new System.Drawing.Point(12, 56);
             this.gMapControl1.MarkersEnabled = true;
             this.gMapControl1.MaxZoom = 18;
             this.gMapControl1.MinZoom = 2;
@@ -191,19 +196,45 @@
             this.gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
             this.gMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
             this.gMapControl1.ShowTileGridLines = false;
-            this.gMapControl1.Size = new System.Drawing.Size(638, 521);
+            this.gMapControl1.Size = new System.Drawing.Size(618, 501);
             this.gMapControl1.TabIndex = 0;
             this.gMapControl1.Zoom = 9D;
             this.gMapControl1.OnPositionChanged += new GMap.NET.PositionChanged(this.gMapControl1_OnPositionChanged);
             this.gMapControl1.OnMapZoomChanged += new GMap.NET.MapZoomChanged(this.gMapControl1_OnMapZoomChanged);
             // 
+            // menuMain
+            // 
+            this.menuMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.zoneToolStripMenuItem});
+            this.menuMain.Location = new System.Drawing.Point(0, 0);
+            this.menuMain.Name = "menuMain";
+            this.menuMain.Size = new System.Drawing.Size(950, 24);
+            this.menuMain.TabIndex = 12;
+            this.menuMain.Text = "menuStrip1";
+            // 
+            // zoneToolStripMenuItem
+            // 
+            this.zoneToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.upravljajZonamaToolStripMenuItem});
+            this.zoneToolStripMenuItem.Name = "zoneToolStripMenuItem";
+            this.zoneToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
+            this.zoneToolStripMenuItem.Text = "Zone";
+            // 
+            // upravljajZonamaToolStripMenuItem
+            // 
+            this.upravljajZonamaToolStripMenuItem.Name = "upravljajZonamaToolStripMenuItem";
+            this.upravljajZonamaToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.upravljajZonamaToolStripMenuItem.Text = "Upravljaj zonama...";
+            this.upravljajZonamaToolStripMenuItem.Click += new System.EventHandler(this.upravljajZonamaToolStripMenuItem_Click);
+            // 
             // frmMap
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(908, 596);
+            this.ClientSize = new System.Drawing.Size(950, 590);
             this.Controls.Add(this.listTabControl);
             this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.menuMain);
             this.Controls.Add(this.lblStaticZoomLevel);
             this.Controls.Add(this.numZoomLevel);
             this.Controls.Add(this.btnPrint);
@@ -212,6 +243,7 @@
             this.Controls.Add(this.cmbProvider);
             this.Controls.Add(this.gMapControl1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MainMenuStrip = this.menuMain;
             this.MinimumSize = new System.Drawing.Size(655, 482);
             this.Name = "frmMap";
             this.Text = "Mapa";
@@ -220,6 +252,8 @@
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ctxDelete.ResumeLayout(false);
+            this.menuMain.ResumeLayout(false);
+            this.menuMain.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -240,5 +274,8 @@
         private System.Windows.Forms.TabControl listTabControl;
         private System.Windows.Forms.ContextMenuStrip ctxDelete;
         private System.Windows.Forms.ToolStripMenuItem obrišToolStripMenuItem;
+        private System.Windows.Forms.MenuStrip menuMain;
+        private System.Windows.Forms.ToolStripMenuItem zoneToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem upravljajZonamaToolStripMenuItem;
     }
 }

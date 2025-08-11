@@ -7,9 +7,6 @@ using System.Windows.Forms;
 using System;
 using System.Drawing;
 using System.Diagnostics.Eventing.Reader;
-
-
-
 #if DEBUG
 using System.Diagnostics;
 #endif
@@ -22,14 +19,20 @@ namespace NOTAM_Browser
         private static string FILENAME = "polys.json";
         private static string fullFileName { get { return Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), FILENAME); } }
 
+
+        private static int tries = 0;
+
         #region "Old versions"
         /// <summary>
         /// Checks if the save file is a file from a previous version, in which case asks the user if they want to automatically update the file and set all the polygons in it in the "Custom" category.
         /// </summary>
-        private static void CheckForV1Json()
+        private static PolyData CheckForV1Json()
         {
             try
             {
+                if (tries >= 1) return null;
+                tries++;
+
                 string json = File.ReadAllText(fullFileName);
 
                 Group v1Json = JsonConvert.DeserializeObject<Group>(json);
@@ -39,17 +42,24 @@ namespace NOTAM_Browser
                 if (convert == DialogResult.Yes)
                 {
                     PolyData pd = new PolyData();
-                    pd._groups = new Dictionary<string, JToken>();
-                    JToken jt = JToken.FromObject(v1Json);
-                    pd._groups.Add("Custom", jt);
+                    pd.Groups.Add("v1", v1Json);
 
                     string jsonText = JsonConvert.SerializeObject(pd);
 
                     File.WriteAllText(fullFileName, jsonText);
 
                     // TODO fix this thank
-                    Application.Restart();
-                    Application.Exit();
+                    /*Application.Restart();
+                    Application.Exit();*/
+                    return LoadPolys();
+                } 
+                else
+                {
+                    File.Move(fullFileName, Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), FILENAME + ".v1"));
+#if DEBUG
+                    Debug.WriteLine("MapManager: v1 json save file moved to .json.v1");
+#endif
+                    return null;
                 }
             }
             catch (Exception ex)
@@ -58,15 +68,17 @@ namespace NOTAM_Browser
                 Debug.WriteLine($"MapManager: Error while checking for V1 JSON file: {ex}");
 #endif
             }
+
+            return null;
         }
         #endregion
-
         /// <summary>
         /// Reads the file and returns the deserialized json
         /// </summary>
         /// <returns>The deserialized json as a PolyData object</returns>
         public static PolyData LoadPolys()
         {
+
             if (!File.Exists(fullFileName))
             {
 #if DEBUG
@@ -81,22 +93,13 @@ namespace NOTAM_Browser
                 PolyData data = JsonConvert.DeserializeObject<PolyData>(json);
                 return data;
             }
-            catch (JsonException ex)
-            {
-#if DEBUG
-                Debug.WriteLine($"MapManager: Error deserializing zones from {FILENAME}: {ex.ToString()}");
-#endif
-                CheckForV1Json();
-            }
             catch(Exception ex)
             {
 #if DEBUG
                 Debug.WriteLine($"MapManager: General error deserializing zones from {FILENAME}: {ex.ToString()}");
 #endif
-                CheckForV1Json();
+                return CheckForV1Json();
             }
-
-            return null;
         }
 
         /// <summary>
@@ -320,7 +323,7 @@ namespace NOTAM_Browser
         public string Name { get; set; }
 
         [OnSerializing]
-        public void ConvertData(StreamingContext context)
+        private void ConvertData(StreamingContext context)
         {
             _polygons = new Dictionary<string, JToken>();
 

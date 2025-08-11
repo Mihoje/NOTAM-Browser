@@ -177,7 +177,7 @@ namespace NOTAM_Browser
         /// in a smoother circle.</param>
         /// <returns>A list of <see cref="LatLon"/> objects representing the geographic coordinates of the circle's
         /// circumference. The list contains <paramref name="points"/> evenly spaced coordinates.</returns>
-        private static List<LatLon> GenerateCircle(LatLon center, double radiusMeters, int points = 36)
+        public static List<LatLon> GenerateCircle(LatLon center, double radiusMeters, int points = 36)
         {
             var coords = new List<LatLon>();
             var lat = center.Latitude * Math.PI / 180.0;
@@ -201,6 +201,11 @@ namespace NOTAM_Browser
             }
 
             return coords;
+        }
+
+        public static List<LatLon> GenerateCircleNM(LatLon center, double radiusNm, int points = 36)
+        {
+            return GenerateCircle(center, radiusNm * 1852, points);
         }
 
         /// <summary>
@@ -361,5 +366,42 @@ namespace NOTAM_Browser
         public int ConvertedStringLength => ConvertedString?.Length ?? -1;
         public int Index { get; set; }
         public override string ToString() => $"{Latitude}, {Longitude}";
+
+        // jaaaki cedo ↓... nisam ni znao da moze ovakav tip da bude return iz metode... c# postao python
+        private static (int deg, int min, double sec) ToDms(double decimalDegrees)
+        {
+            double abs = Math.Abs(decimalDegrees);
+
+            int deg = (int)abs;
+            double minFull = (abs - deg) * 60;
+            int min = (int)minFull;
+            double sec = (minFull - min) * 60;
+
+            // --- Handle rounding overflow ---
+            if (sec >= 59.995)
+            {
+                sec = 0;
+                min++;
+            }
+            if (min >= 60)
+            {
+                min = 0;
+                deg++;
+            }
+
+            return (deg, min, sec);
+        }
+
+        public string ToFullString()
+        {
+            var (latDeg, latMin, latSec) = ToDms(Latitude);
+            var (lonDeg, lonMin, lonSec) = ToDms(Longitude);
+
+            return string.Format(
+                "{0}{1:00}°{2:00}′{3:00.##}″ {4}{5:000}°{6:00}′{7:00.##}″",
+                Latitude >= 0 ? "N" : "S", latDeg, latMin, latSec,
+                Longitude >= 0 ? "E" : "W", lonDeg, lonMin, lonSec
+            );
+        }
     }
 }

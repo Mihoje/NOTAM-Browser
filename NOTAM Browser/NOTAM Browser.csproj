@@ -147,6 +147,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="frmEditPolys.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmEditPolys.Designer.cs">
+      <DependentUpon>frmEditPolys.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmPrint.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -190,6 +196,9 @@
     </Compile>
     <EmbeddedResource Include="frmAckNotams.resx">
       <DependentUpon>frmAckNotams.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmEditPolys.resx">
+      <DependentUpon>frmEditPolys.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>

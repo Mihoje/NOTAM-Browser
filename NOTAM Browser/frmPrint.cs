@@ -1,13 +1,6 @@
 ﻿using GMap.NET.WindowsForms;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NOTAM_Browser
@@ -99,6 +92,11 @@ namespace NOTAM_Browser
         private void btnExtend_Click(object sender, EventArgs e)
         {
             printManager.PrintTimeoutSeconds += 10;
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            printManager.PrintTimeoutSeconds = -1;
         }
     }
 }

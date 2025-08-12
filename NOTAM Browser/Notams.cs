@@ -1,15 +1,16 @@
 ﻿using NOTAM_Browser.Properties;
 using System;
 using System.Collections.Generic;
-#if DEBUG
-using System.Diagnostics;
-#endif
 using System.IO;
 using System.Net.Http;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+#if DEBUG
+using System.Diagnostics;
+#endif
 
 namespace NOTAM_Browser
 {

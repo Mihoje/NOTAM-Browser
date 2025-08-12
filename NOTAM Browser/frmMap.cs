@@ -5,14 +5,15 @@ using System.Linq;
 using Newtonsoft.Json;
 using System.Windows.Forms;
 using System.IO;
-#if DEBUG
-using System.Diagnostics;
-#endif
 using GMap.NET.MapProviders;
 using NOTAM_Browser.MapProviders;
 using NOTAM_Browser.Properties;
 using System.Text.RegularExpressions;
 using GMap.NET.WindowsForms;
+
+#if DEBUG
+using System.Diagnostics;
+#endif
 
 namespace NOTAM_Browser
 {

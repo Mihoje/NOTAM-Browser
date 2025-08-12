@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
 #if DEBUG
 using System.Diagnostics;
 #endif
-using System.Drawing;
-using System.Windows.Forms;
 
 namespace NOTAM_Browser
 {

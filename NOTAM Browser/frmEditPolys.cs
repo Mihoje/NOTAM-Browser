@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NOTAM_Browser
@@ -18,6 +13,8 @@ namespace NOTAM_Browser
         {
             InitializeComponent();
             this.parent = parent;
+
+            toolTip1.SetToolTip(txtPolyCoordinates, "Unesi koordinate iz AUP-a. Program će sam prepoznati i ispisati prepoznate koordinate u polju desno.\nUkoliko želiš da obrišeš zonu iz 'Custom' grupe, samo unesi naziv zone bez ijedne koordinate i klikni Dodaj poligon.");
         }
 
         private void txtPolyCoordinates_TextChanged(object sender, EventArgs e)

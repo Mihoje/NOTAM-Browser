@@ -1,17 +1,13 @@
 ﻿using GMap.NET;
 using GMap.NET.WindowsForms;
-using NOTAM_Browser.MapProviders;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Printing;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+#if DEBUG
+using System.Diagnostics;
+#endif
 
 namespace NOTAM_Browser
 {
@@ -184,6 +180,8 @@ namespace NOTAM_Browser
             NewControl.MapProvider = MapControl.MapProvider;
 
             NewControl.SetZoomToFitRect(MapControl.ViewArea);
+
+            NewControl.ReloadMap();
         }
 
 
@@ -251,11 +249,14 @@ namespace NOTAM_Browser
 #if DEBUG
                         Debug.WriteLine("PrintManager: Waiting for tile load to complete...");
 #endif
+                        PrintTimeoutSeconds = 45; //reset na podrazumevanu vrednost
 
                         while (waitingForTileLoad && fallbackCounter < PrintTimeoutSeconds * 10) // Izbaci iz thread-a nakon 45 sekundi
                         {
                             Thread.Sleep(100);
+#if DEBUG
                             Debug.WriteLine("PrintManager: Waiting for tile load to complete... " + fallbackCounter);
+#endif
                             frm.SetLabelText($"Učitavam mapu... {PrintTimeoutSeconds - fallbackCounter / 10}s");
 
                             fallbackCounter++;
@@ -265,14 +266,17 @@ namespace NOTAM_Browser
                         Debug.WriteLine("PrintManager: Done!");
 #endif
 
-                        frm.SetLabelText("Štampam mapu...");
+                        frm.SetLabelText(PrintTimeoutSeconds < 0 ? "Prekidam štampanje" : "Štampam mapu...");
 
                         Thread.Sleep(1000); // Daj malo vremena da se mapa osveži
 
                         if (mapImage == null)
                         {
-                            frm.SetLabelText("Greška pri učitavanju mape.");
-                            MessageBox.Show("Greška pri učitavanju mape. Pokušajte ponovo.", "Greška", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            if (PrintTimeoutSeconds >= 0)
+                            {
+                                frm.SetLabelText("Greška pri učitavanju mape.");
+                                MessageBox.Show("Greška pri učitavanju mape. Pokušajte ponovo.", "Greška", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
                             e.Cancel = true;
                             CompletePrint();
                             return;
@@ -392,11 +396,14 @@ namespace NOTAM_Browser
             }
             finally
             {
+#if DEBUG
                 Debug.WriteLine("PrintManager: OnTileLoadComplete finished.");
+#endif
                 waitingForTileLoad = false;
             }
-
+#if DEBUG
             Debug.WriteLine("PrintManager: OnTileLoadComplete finished2.");
+#endif
             waitingForTileLoad = false;
 
         }

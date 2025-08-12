@@ -6,7 +6,6 @@ using System.IO;
 using System.Windows.Forms;
 using System;
 using System.Drawing;
-using System.Diagnostics.Eventing.Reader;
 #if DEBUG
 using System.Diagnostics;
 #endif

@@ -1,11 +1,12 @@
 ﻿using GMap.NET;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+
+#if DEBUG
+using System.Diagnostics;
+#endif
 
 namespace NOTAM_Browser
 {

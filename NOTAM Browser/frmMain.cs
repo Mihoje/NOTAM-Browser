@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using NOTAM_Browser.Helpers;
+
 
 #if DEBUG
 using System.Diagnostics;
@@ -33,6 +35,8 @@ namespace NOTAM_Browser
                 notamFont = Settings.Default.notamFont;
             }
 
+            updateSearchHistory();
+
             nos = new Notams();
             frmAckNotams = new frmAckNotams(nos);
             mapForm = new frmMap(nos);
@@ -45,26 +49,47 @@ namespace NOTAM_Browser
 
         private void frmMain_Load(object sender, EventArgs e)
         {
-            showNotams(nos.CurrentNotams);
-            txtSearch.Text = nos.LastSearch;
-            txtSearch.SelectionStart = txtSearch.TextLength;
+            showNotams(new Dictionary<string, string>(nos.CurrentNotams));
+            cmbSearch.Text = nos.LastSearch;
+            cmbSearch.SelectionStart = cmbSearch.Text.Length;
             slblLatestNotam.Text = $"Poslednje ažuriranje: {nos.CurrentNotamsTime}";
 
-            tooltipDesignators.SetToolTip(txtSearch, "Unesi ICAO designator ili više njih razdvojenih razmakom.\n\nPrimer:'LYBT' ili 'LYBT,LYBA'");
+            tooltipDesignators.SetToolTip(cmbSearch, "Unesi ICAO designator ili više njih razdvojenih zarezom.\n\nPrimer:'LYBT' ili 'LYBT,LYBA'");
+        }
+
+        private void updateSearchHistory()
+        {
+            updateSearchHistory(SettingsManager.GetSearchHistory());
+        }
+        private void updateSearchHistory(List<string> searchHistory)
+        {
+            cmbSearch.Items.Clear();
+
+            foreach (var item in searchHistory)
+            {
+                cmbSearch.Items.Add(item);
+            }
         }
 
         private async void pretraziNotame()
         {
-            if (txtSearch.Text.Trim() == "") return;
+            string searchTerm = cmbSearch.Text.Trim().ToUpper();
+
+            if (searchTerm == "") return;
+            if (nos.BusyPullingNotams) return;
 
             slblLatestNotam.Text = "Povlačim NOTAM-e...";
 
-            await nos.GetFromInternet(txtSearch.Text);
+            var serachHistory = SettingsManager.AddToSearchHistory(searchTerm);
+
+            updateSearchHistory(serachHistory);
+
+            await nos.GetFromInternet(searchTerm);
 
             if (chkFilterDatum.Checked)
                 showNotams(nos.GetNotamsForDate(dtpFilterDatum.Value));
             else
-                showNotams(nos.CurrentNotams);
+                showNotams(new Dictionary<string, string>(nos.CurrentNotams));
 
             slblLatestNotam.Text = $"Poslednje ažuriranje: {nos.CurrentNotamsTime}";
         }
@@ -82,7 +107,7 @@ namespace NOTAM_Browser
 
                 SizeF textSize = txt.CreateGraphics().MeasureString(txt.Text + Environment.NewLine + "a" + Environment.NewLine + "a", txt.Font, 10000, new StringFormat(0));
 
-                txt.Height = (int)textSize.Height + 1; //nekad se desava da zbog nekog razloga malo zakine pa dodajem 2 px for good measure
+                txt.Height = (int)textSize.Height + 1; //nekad se desava da zbog nekog razloga malo zakine pa dodajem 1 px for good measure
             }
         }
 
@@ -99,6 +124,8 @@ namespace NOTAM_Browser
                 string notamText = NormalizeNewLines(pair.Value);
 
                 var coordinates = NotamParser.ParseCoordinates(notamText);
+
+                var zone = NotamParser.TryFindZone(notamText);
 
                 CheckBox chk = new CheckBox()
                 {
@@ -136,6 +163,22 @@ namespace NOTAM_Browser
                     txt.SelectionFont = new Font(txt.Font, FontStyle.Underline);
                 }
 
+                if (zone != null)
+                {
+                    if (string.IsNullOrEmpty(zone.ConvertedString)) continue;
+
+                    if (zone.Index < 0 || zone.Index >= notamText.Length) continue;
+
+                    string temp = txt.Text.Substring(0, zone.Index);
+
+                    int diff = temp.Length - temp.Replace("\n", "").Length;
+
+                    txt.SelectionStart = zone.Index - diff;
+                    txt.SelectionLength = zone.ConvertedStringLength;
+                    //txt.SelectionColor = Color.Green;
+                    txt.SelectionFont = new Font(txt.Font, FontStyle.Underline);
+                }
+
                 txt.SelectionStart = 0;
                 txt.SelectionLength = 0;
 
@@ -164,10 +207,26 @@ namespace NOTAM_Browser
             if (chkFilterDatum.Checked)
                 showNotams(nos.GetNotamsForDate(dtpFilterDatum.Value));
             else
-                showNotams(nos.CurrentNotams);
+                showNotams(new Dictionary<string, string>(nos.CurrentNotams));
         }
 
         #region "Event Handlers"
+
+        private void mapaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            mapForm.Show();
+        }
+
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            mapForm.ClosingApp();
+            //Environment.Exit(0);
+        }
+
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            mapForm.DrawNotam(notamIdClicked);
+        }
 
         private void Txt_Click(object sender, MouseEventArgs e)
         {
@@ -319,7 +378,7 @@ namespace NOTAM_Browser
 
             if (nos.SaveToFile())
             {
-                MessageBox.Show("Uspešno sačuvano!", "Sacuvan fajl", MessageBoxButtons.OK);
+                MessageBox.Show("Uspešno sačuvano!", "Sačuvan fajl", MessageBoxButtons.OK);
             }
         }
 
@@ -353,7 +412,7 @@ namespace NOTAM_Browser
                 showNotams(nos.GetNotamsForDate(dtpFilterDatum.Value));
         }
 
-        private void txtSearch_KeyDown(object sender, KeyEventArgs e)
+        private void cmbSearch_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
@@ -366,13 +425,13 @@ namespace NOTAM_Browser
             pretraziNotame();
         }
 
-        private void txtSearch_TextChanged(object sender, EventArgs e)
+        private void cmbSearch_TextChanged(object sender, EventArgs e)
         {
-            int cursorPosition = txtSearch.SelectionStart;
+            int cursorPosition = cmbSearch.SelectionStart;
 
-            txtSearch.Text = txtSearch.Text.ToUpper();
+            cmbSearch.Text = cmbSearch.Text.ToUpper();
 
-            txtSearch.SelectionStart = cursorPosition;
+            cmbSearch.SelectionStart = cursorPosition;
         }
 
         private void chkFilterDatum_CheckedChanged(object sender, EventArgs e)
@@ -380,7 +439,7 @@ namespace NOTAM_Browser
             if (chkFilterDatum.Checked)
                 showNotams(nos.GetNotamsForDate(dtpFilterDatum.Value));
             else
-                showNotams(nos.CurrentNotams);
+                showNotams(new Dictionary<string, string>(nos.CurrentNotams));
         }
 
         private void chkFilterAck_CheckedChanged(object sender, EventArgs e)
@@ -399,20 +458,6 @@ namespace NOTAM_Browser
 
         #endregion
 
-        private void mapaToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            mapForm.Show();
-        }
-
-        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            mapForm.ClosingApp();
-            //Environment.Exit(0);
-        }
-
-        private void toolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            mapForm.DrawNotam(notamIdClicked);
-        }
+        
     }
 }

@@ -6,10 +6,10 @@
       <Value Profile="(Default)">Consolas, 9.75pt</Value>
     </Setting>
     <Setting Name="urlPre" Type="System.String" Scope="User">
-      <Value Profile="(Default)">https://www.notams.faa.gov/dinsQueryWeb/queryRetrievalMapAction.do?reportType=Raw&amp;retrieveLocId=</Value>
+      <Value Profile="(Default)">https://notams.aim.faa.gov/notamSearch/search</Value>
     </Setting>
     <Setting Name="urlAft" Type="System.String" Scope="User">
-      <Value Profile="(Default)">&amp;actionType=notamRetrievalByICAOs</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="notamPre" Type="System.String" Scope="User">
       <Value Profile="(Default)">&lt;PRE&gt;</Value>
@@ -28,6 +28,12 @@
     </Setting>
     <Setting Name="lastMapZoom" Type="System.Double" Scope="User">
       <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="displayVerticalBoundaries" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="searchHistory" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

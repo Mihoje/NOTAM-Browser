@@ -30,7 +30,7 @@
     <TargetCulture>sr-Latn</TargetCulture>
     <ProductName>NOTAM Browser</ProductName>
     <PublisherName>MihaSoftware</PublisherName>
-    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationRevision>1</ApplicationRevision>
     <ApplicationVersion>1.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -84,6 +84,18 @@
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug with exceptions|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug with exceptions\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;CODE_ANALYSIS,EXCEPT,OLD_CODE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -159,6 +171,7 @@
     <Compile Include="frmPrint.Designer.cs">
       <DependentUpon>frmPrint.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\SettingsManager.cs" />
     <Compile Include="MapManager.cs" />
     <Compile Include="frmAckNotams.cs">
       <SubType>Form</SubType>
@@ -186,6 +199,7 @@
     </Compile>
     <Compile Include="MapProviders\ArcGIS_World_Imagery_MapProvider.cs" />
     <Compile Include="MapProviders\MapyMapProvider.cs" />
+    <Compile Include="MapTypes\GMapLevelBlock.cs" />
     <Compile Include="NotamParser.cs" />
     <Compile Include="Notams.cs" />
     <Compile Include="PrintManager.cs" />

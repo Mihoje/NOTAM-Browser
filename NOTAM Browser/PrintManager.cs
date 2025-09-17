@@ -5,6 +5,9 @@ using System.Drawing;
 using System.Drawing.Printing;
 using System.Threading;
 using System.Windows.Forms;
+using NOTAM_Browser.MapTypes;
+
+
 #if DEBUG
 using System.Diagnostics;
 #endif
@@ -13,10 +16,12 @@ namespace NOTAM_Browser
 {
     internal class PrintManager : IDisposable
     {
+        private const int DefaultPrintTimeoutSeconds = 45;
+
         public GMapControl MapControl { get; set; }
         public GMapControl NewControl { get; private set; }
         public int ZoomLevel { get; set; }
-        public int PrintTimeoutSeconds { get; set; } = 45; // Default timeout for printing in seconds
+        public int PrintTimeoutSeconds { get; set; } = DefaultPrintTimeoutSeconds; // Default timeout for printing in seconds
 
         public bool IsPrintingInProgress
         {
@@ -153,7 +158,24 @@ namespace NOTAM_Browser
                 if (!overlay.IsVisibile) continue;
 
                 GMapOverlay newOverlay = new GMapOverlay(overlay.Id);
-                foreach (var obj in overlay.Markers) newOverlay.Markers.Add(obj);
+                foreach (var obj in overlay.Markers)
+                {
+                    GMapMarker newMarker;
+
+                    if (obj is GMapLevelBlock m)
+                    {
+                        newMarker = new GMapLevelBlock(m.Position, m.LowerLimit, m.UpperLimit, m.TextBrush, m.FontFamily, m.FontHeightInMeters)
+                        {
+                            IsVisible = m.IsVisible
+                        };
+
+                        newOverlay.Markers.Add(newMarker);
+                    }
+                    else
+                    {
+                        newOverlay.Markers.Add(obj);
+                    }
+                }
                 foreach (var obj in overlay.Polygons)
                 {
                     var newPolygon = new GMapPolygon(obj.Points, obj.Name)
@@ -342,6 +364,8 @@ namespace NOTAM_Browser
         /// single-threaded apartment (STA) mode.</remarks>
         public void DoPrint()
         {
+            PrintTimeoutSeconds = DefaultPrintTimeoutSeconds; // Reset timeout to default value
+
             frm.SetLabelText("Čekam za štampanje");
             frm.Show();
 
@@ -353,6 +377,7 @@ namespace NOTAM_Browser
             t.SetApartmentState(ApartmentState.STA);
             t.Start();
         }
+
 
         /// <summary>
         /// Handles the completion of tile loading and performs necessary actions such as rendering the map image.

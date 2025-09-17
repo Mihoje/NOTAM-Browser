@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Drawing;
+
 
 #if DEBUG
 using System.Diagnostics;
@@ -352,6 +354,99 @@ namespace NOTAM_Browser
 
             return zoneName;
         }
+
+        public static (string, string) GetNotamVerticalLimits(Notams nos, string NotamID)
+        {
+            if (string.IsNullOrEmpty(NotamID) || !nos.CurrentNotams.ContainsKey(NotamID))
+            {
+                return (null, null); // Not found
+            }
+            else return GetNotamVerticalLimits(nos.CurrentNotams[NotamID]);
+        }
+
+        public static (string, string) GetNotamVerticalLimits(string NotamText)
+        {
+            if (string.IsNullOrEmpty(NotamText)) return (null, null);
+
+            NotamText = NotamText.Replace("\r\n", "\n");
+
+            int lowerLimitStartIndex = NotamText.IndexOf("F) ") + 3;
+            int lowerLimitEndIndex = NotamText.IndexOf("G) ", lowerLimitStartIndex);
+
+            int upperLimitStartIndex = lowerLimitEndIndex + 3;
+            int upperLimitEndIndex = NotamText.IndexOf("\n", upperLimitStartIndex);
+
+            if(upperLimitEndIndex == -1)
+            {
+                upperLimitEndIndex = NotamText.Length;
+            }
+
+            string lowerLimit = NotamText.Substring(lowerLimitStartIndex, lowerLimitEndIndex - lowerLimitStartIndex).Trim();
+            string upperLimit = NotamText.Substring(upperLimitStartIndex, upperLimitEndIndex - upperLimitStartIndex).Trim();
+
+            return (lowerLimit, upperLimit);
+        }
+
+        public static ZoneInNotam TryFindZone(Notams nos, string NotamID)
+        {
+            if (
+                nos == null ||
+                nos.CurrentNotams == null ||
+                string.IsNullOrEmpty(NotamID) || 
+                !nos.CurrentNotams.ContainsKey(NotamID))
+            {
+                return null; // Not found
+            }
+
+            return TryFindZone(nos.CurrentNotams[NotamID]);
+        }
+
+        public static ZoneInNotam TryFindZone(string notamText, bool raw = false)
+        {
+            int index = raw ? 0 : notamText.IndexOf("E)");
+            if (index == -1) return null; // No "E)" found
+
+            string searchText = notamText.Substring(index).Trim().ToLower();
+
+            int diff = notamText.Length - searchText.Length;
+
+            var zones = MapManager.LoadPolys();
+
+            foreach (var item in zones.AllZoneNames)
+            {
+                int foundIndex;
+
+                var search = new List<string>() { 
+                    item.Value.Item2.Trim().ToLower(), // as is                    
+                };
+
+                if(item.Value.Item2.Contains('(')) // ako ima zagrade, onda trazimo i samo ono pre zagrada
+                    search.Add(item.Value.Item2.Substring(0, item.Value.Item2.IndexOf('(')).Trim().ToLower()); // do prve zagrade)
+
+                foreach (var searchItem in search)
+                {
+                    if((foundIndex = searchText.IndexOf(searchItem)) != -1)
+                    {
+                        return new ZoneInNotam
+                        (
+                            item.Key, // Zone.ID
+                            item.Value.Item2, // Zone.Name
+                            notamText.Substring(foundIndex + diff, searchItem.Length), // ConvertedString
+                            foundIndex + diff, // Index
+                            zones.AllZones[item.Key].Points.Select(p => {
+                                if (p.Count != 2)
+                                    return new PointLatLng(0, 0); // Invalid point, return default
+                                else
+                                    return new PointLatLng(p[0], p[1]);
+                                }).ToList(), // ZonePoints
+                            zones.AllZones[item.Key].Color // Color
+                        );
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 
     /// <summary>
@@ -403,6 +498,27 @@ namespace NOTAM_Browser
                 Latitude >= 0 ? "N" : "S", latDeg, latMin, latSec,
                 Longitude >= 0 ? "E" : "W", lonDeg, lonMin, lonSec
             );
+        }
+    }
+
+    internal class ZoneInNotam
+    {
+        public string ZoneID { get; private set; }
+        public string ZoneName { get; private set; }
+        public string ConvertedString { get; private set; }
+        public int ConvertedStringLength => ConvertedString?.Length ?? -1;
+        public int Index { get; private set; }
+        public List<PointLatLng> ZonePoints { get; private set; }
+        public List<int> Color { get; private set; }
+
+        public ZoneInNotam(string zoneID, string zoneName, string convertedString, int index, List<PointLatLng> zonePoints, List<int> color)
+        {
+            ZoneID = zoneID;
+            ZoneName = zoneName;
+            ConvertedString = convertedString;
+            Index = index;
+            ZonePoints = zonePoints;
+            Color = color;
         }
     }
 }

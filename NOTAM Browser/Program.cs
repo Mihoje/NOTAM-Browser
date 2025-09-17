@@ -20,9 +20,15 @@ namespace NOTAM_Browser
             }
             catch (Exception ex)
             {
+#if DEBUG
                 Debug.WriteLine($"Program: An error occurred during application startup: {ex}");
+#endif
+#if EXCEPT
+                throw ex;
+#else
                 // Optionally log the error or handle it as needed
                 System.IO.File.WriteAllText("crash.log", $"{ex.Message}\n| {ex.StackTrace}");
+#endif
             }
         }
     }

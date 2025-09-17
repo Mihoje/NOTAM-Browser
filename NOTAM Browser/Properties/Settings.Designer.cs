@@ -37,8 +37,7 @@ namespace NOTAM_Browser.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://www.notams.faa.gov/dinsQueryWeb/queryRetrievalMapAction.do?reportType=Raw" +
-            "&retrieveLocId=")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://notams.aim.faa.gov/notamSearch/search")]
         public string urlPre {
             get {
                 return ((string)(this["urlPre"]));
@@ -50,7 +49,7 @@ namespace NOTAM_Browser.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("&actionType=notamRetrievalByICAOs")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string urlAft {
             get {
                 return ((string)(this["urlAft"]));
@@ -129,6 +128,30 @@ namespace NOTAM_Browser.Properties {
             }
             set {
                 this["lastMapZoom"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool displayVerticalBoundaries {
+            get {
+                return ((bool)(this["displayVerticalBoundaries"]));
+            }
+            set {
+                this["displayVerticalBoundaries"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string searchHistory {
+            get {
+                return ((string)(this["searchHistory"]));
+            }
+            set {
+                this["searchHistory"] = value;
             }
         }
     }

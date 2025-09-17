@@ -7,6 +7,10 @@ using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Net.Http.Headers;
+using System.Linq;
+
+
 
 #if DEBUG
 using System.Diagnostics;
@@ -25,12 +29,13 @@ namespace NOTAM_Browser
     {
         // private vars
         private const string FILENAME = "notams.json";
-        private readonly string NOTAMQUERY = $"{Settings.Default.urlPre ?? ""}{{0}}{Settings.Default.urlAft ?? ""}";
+        private readonly string NOTAMQUERY = $"{Settings.Default.urlPre ?? ""}";
         private readonly string NOTAM_DECODE_PRE = Settings.Default.notamPre ?? "";
         private readonly string NOTAM_DECODE_AFT = Settings.Default.notamAft ?? "";
-
+        
         //private properties
         private static string fullFileName { get { return Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), FILENAME); } }
+        private static readonly Comparer<string> COMPARER = Comparer<string>.Create((x, y) => y.CompareTo(x));
 
         //public delegates
         public delegate void NotamAcknowledgedHandler(string NotamID);
@@ -38,9 +43,10 @@ namespace NOTAM_Browser
 
         //public properties
         public Dictionary<string, string> AcknowledgedNotams { get; private set; }
-        public Dictionary<string, string> CurrentNotams { get; private set; }
+        public SortedDictionary<string, string> CurrentNotams { get; private set; }
         public DateTime CurrentNotamsTime { get; private set; }
         public string LastSearch { get; private set; }
+        public bool BusyPullingNotams { get; private set; } = false;
 
         //public events
         public event NotamAcknowledgedHandler NotamAcknowledged;
@@ -62,7 +68,7 @@ namespace NOTAM_Browser
                 this.CurrentNotamsTime = nd.LatestNotamsTime;
 
             this.AcknowledgedNotams = nd.AcknowledgedNotams ?? new Dictionary<string, string>();
-            this.CurrentNotams = nd.LatestNotams ?? new Dictionary<string, string>();
+            this.CurrentNotams = nd.LatestNotams ?? new SortedDictionary<string, string>(COMPARER);
             this.LastSearch = nd.LastSearch ?? "";
         }
 
@@ -156,9 +162,86 @@ namespace NOTAM_Browser
             return filteredNotams;
         }
 
-
         public async Task GetFromInternet(string Designators)
         {
+            if (BusyPullingNotams)
+            {
+#if DEBUG
+                Debug.WriteLine($"Notams: GetFromInternet called but there's already a task running. Aborting.");
+#endif
+                return;
+            }
+
+            BusyPullingNotams = true;
+
+            try
+            {
+                string httpResponse;
+
+                using (var client = new HttpClient())
+                {
+
+                    var query = new Dictionary<string, string>
+                    {
+                        { "searchType", "0" },
+                        { "designatorsForLocation", Designators }
+                    };
+
+                    var content = new FormUrlEncodedContent(query);
+
+                    content.Headers.Clear();
+                    content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");                    
+
+                    Debug.WriteLine(content.Headers);
+
+                    var response = await client.PostAsync(NOTAMQUERY, content);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        throw new HttpRequestException($"Request status code {response.StatusCode}");
+                    }
+
+                    httpResponse = await response.Content.ReadAsStringAsync();
+                }
+
+                var rawData = JsonConvert.DeserializeObject<InternetNotamV2Root>(httpResponse);
+
+                CurrentNotams.Clear();
+
+                foreach(var notam in rawData.NotamList)
+                {
+                    CurrentNotams.Add($"{notam.IcaoId}{notam.NotamNumber}", notam.IcaoMessage);
+                }
+                
+                CurrentNotamsTime = DateTime.Now;
+                LastSearch = Designators;
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                MessageBox.Show($"Greška u toku dobijanja NOTAM-a: {ex.ToString()}");
+#else
+                MessageBox.Show($"Greška u toku dobijanja NOTAM-a: {ex.Message}");
+#endif
+            }
+            finally
+            {
+                BusyPullingNotams = false;
+            }
+        }
+
+#if OLD_CODE
+        public async Task GetFromInternetV1(string Designators)
+        {
+            if (BusyPullingNotams)
+            {
+#if DEBUG
+                Debug.WriteLine($"Notams: GetFromInternet called but there's already a task running. Aborting.");
+#endif
+                return;
+            }
+
+            BusyPullingNotams = true;
             try
             {
                 string URL = String.Format(NOTAMQUERY, Designators);
@@ -212,7 +295,12 @@ namespace NOTAM_Browser
                 MessageBox.Show($"Greška u toku dobijanja NOTAM-a: {ex.Message}");
 #endif
             }
+            finally
+            {
+                BusyPullingNotams = false;
+            }
         }
+#endif
 
         public bool AcknowledgeNotam(string NotamID)
         {
@@ -275,13 +363,175 @@ namespace NOTAM_Browser
             public Dictionary<string, string> AcknowledgedNotams { get; set; }
 
             [JsonProperty("latest_notams")]
-            public Dictionary<string, string> LatestNotams { get; set; }
+            public SortedDictionary<string, string> LatestNotams { get; set; }
 
             [JsonProperty("latest_notams_time")]
             public DateTime LatestNotamsTime { get; set; }
 
             [JsonProperty("last_search")]
             public string LastSearch { get; set; }
+
+            public NotamsData()
+            {
+                LatestNotams = new SortedDictionary<string, string>(Notams.COMPARER);
+            }
+        }
+
+        // od 2025-09-17 je V2
+        public class InternetNotamV2Root
+        {
+            [JsonProperty("notamList")]
+            public List<InternetNotamV2Notam> NotamList { get; set; }
+
+            [JsonProperty("startRecordCount")]
+            public int StartRecordCount { get; set; }
+
+            [JsonProperty("endRecordCount")]
+            public int EndRecordCount { get; set; }
+
+            [JsonProperty("totalNotamCount")]
+            public int TotalNotamCount { get; set; }
+
+            [JsonProperty("filteredResultCount")]
+            public int FilteredResultCount { get; set; }
+
+            [JsonProperty("criteriaCaption")]
+            public string CriteriaCaption { get; set; }
+
+            [JsonProperty("searchDateTime")]
+            public string SearchDateTime { get; set; }
+
+            [JsonProperty("linkedLocationCaption")]
+            public string LinkedLocationCaption { get; set; }
+
+            [JsonProperty("error")]
+            public string Error { get; set; }
+
+            [JsonProperty("countsByType")]
+            public List<InternetNotamV2CountsByType> CountsByType { get; set; }
+
+            [JsonProperty("requestID")]
+            public int RequestID { get; set; }
+        }
+
+        public class InternetNotamV2Notam
+        {
+            [JsonProperty("facilityDesignator")]
+            public string FacilityDesignator { get; set; }
+
+            [JsonProperty("notamNumber")]
+            public string NotamNumber { get; set; }
+
+            [JsonProperty("featureName")]
+            public string FeatureName { get; set; }
+
+            [JsonProperty("issueDate")]
+            public string IssueDate { get; set; }
+
+            [JsonProperty("startDate")]
+            public string StartDate { get; set; }
+
+            [JsonProperty("endDate")]
+            public string EndDate { get; set; }
+
+            [JsonProperty("source")]
+            public string Source { get; set; }
+
+            [JsonProperty("sourceType")]
+            public string SourceType { get; set; }
+
+            [JsonProperty("icaoMessage")]
+            public string IcaoMessage { get; set; }
+
+            [JsonProperty("traditionalMessage")]
+            public string TraditionalMessage { get; set; }
+
+            [JsonProperty("plainLanguageMessage")]
+            public string PlainLanguageMessage { get; set; }
+
+            [JsonProperty("traditionalMessageFrom4thWord")]
+            public string TraditionalMessageFrom4thWord { get; set; }
+
+            [JsonProperty("icaoId")]
+            public string IcaoId { get; set; }
+
+            [JsonProperty("accountId")]
+            public string AccountId { get; set; }
+
+            [JsonProperty("airportName")]
+            public string AirportName { get; set; }
+
+            [JsonProperty("procedure")]
+            public bool Procedure { get; set; }
+
+            [JsonProperty("userID")]
+            public int UserID { get; set; }
+
+            [JsonProperty("transactionID")]
+            public long TransactionID { get; set; }
+
+            [JsonProperty("cancelledOrExpired")]
+            public bool CancelledOrExpired { get; set; }
+
+            [JsonProperty("digitalTppLink")]
+            public bool DigitalTppLink { get; set; }
+
+            [JsonProperty("status")]
+            public string Status { get; set; }
+
+            [JsonProperty("contractionsExpandedForPlainLanguage")]
+            public bool ContractionsExpandedForPlainLanguage { get; set; }
+
+            [JsonProperty("keyword")]
+            public string Keyword { get; set; }
+
+            [JsonProperty("snowtam")]
+            public bool Snowtam { get; set; }
+
+            [JsonProperty("geometry")]
+            public string Geometry { get; set; }
+
+            [JsonProperty("digitallyTransformed")]
+            public bool DigitallyTransformed { get; set; }
+
+            [JsonProperty("messageDisplayed")]
+            public string MessageDisplayed { get; set; }
+
+            [JsonProperty("hasHistory")]
+            public bool HasHistory { get; set; }
+
+            [JsonProperty("moreThan300Chars")]
+            public bool MoreThan300Chars { get; set; }
+
+            [JsonProperty("showingFullText")]
+            public bool ShowingFullText { get; set; }
+
+            [JsonProperty("locID")]
+            public int LocID { get; set; }
+
+            [JsonProperty("defaultIcao")]
+            public bool DefaultIcao { get; set; }
+
+            [JsonProperty("crossoverTransactionID")]
+            public long CrossoverTransactionID { get; set; }
+
+            [JsonProperty("crossoverAccountID")]
+            public string CrossoverAccountID { get; set; }
+
+            [JsonProperty("mapPointer")]
+            public string MapPointer { get; set; }
+
+            [JsonProperty("requestID")]
+            public int RequestID { get; set; }
+        }
+
+        public class InternetNotamV2CountsByType
+        {
+            [JsonProperty("name")]
+            public string Name { get; set; }
+
+            [JsonProperty("value")]
+            public int Value { get; set; }
         }
     }
 

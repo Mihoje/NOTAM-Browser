@@ -31,7 +31,6 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.lblStaticIcaoDesignators = new System.Windows.Forms.Label();
-            this.txtSearch = new System.Windows.Forms.TextBox();
             this.grpFilters = new System.Windows.Forms.GroupBox();
             this.dtpFilterDatum = new System.Windows.Forms.DateTimePicker();
             this.chkFilterDatum = new System.Windows.Forms.CheckBox();
@@ -52,6 +51,7 @@
             this.tooltipDesignators = new System.Windows.Forms.ToolTip(this.components);
             this.cmsNotam = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsmItemShowOnMap = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmbSearch = new System.Windows.Forms.ComboBox();
             this.grpFilters.SuspendLayout();
             this.stsStripMain.SuspendLayout();
             this.menuMain.SuspendLayout();
@@ -66,15 +66,6 @@
             this.lblStaticIcaoDesignators.Size = new System.Drawing.Size(89, 13);
             this.lblStaticIcaoDesignators.TabIndex = 0;
             this.lblStaticIcaoDesignators.Text = "ICAO designators";
-            // 
-            // txtSearch
-            // 
-            this.txtSearch.Location = new System.Drawing.Point(107, 27);
-            this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(161, 20);
-            this.txtSearch.TabIndex = 1;
-            this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
-            this.txtSearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtSearch_KeyDown);
             // 
             // grpFilters
             // 
@@ -255,20 +246,31 @@
             this.cmsNotam.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsmItemShowOnMap});
             this.cmsNotam.Name = "cmsNotam";
-            this.cmsNotam.Size = new System.Drawing.Size(181, 48);
+            this.cmsNotam.Size = new System.Drawing.Size(164, 26);
             // 
             // tsmItemShowOnMap
             // 
             this.tsmItemShowOnMap.Name = "tsmItemShowOnMap";
-            this.tsmItemShowOnMap.Size = new System.Drawing.Size(180, 22);
+            this.tsmItemShowOnMap.Size = new System.Drawing.Size(163, 22);
             this.tsmItemShowOnMap.Text = "Prikaži na mapi...";
             this.tsmItemShowOnMap.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
+            // 
+            // cmbSearch
+            // 
+            this.cmbSearch.FormattingEnabled = true;
+            this.cmbSearch.Location = new System.Drawing.Point(107, 27);
+            this.cmbSearch.Name = "cmbSearch";
+            this.cmbSearch.Size = new System.Drawing.Size(161, 21);
+            this.cmbSearch.TabIndex = 1;
+            this.cmbSearch.TextChanged += new System.EventHandler(this.cmbSearch_TextChanged);
+            this.cmbSearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cmbSearch_KeyDown);
             // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(626, 558);
+            this.Controls.Add(this.cmbSearch);
             this.Controls.Add(this.chkFilterAck);
             this.Controls.Add(this.stsStripMain);
             this.Controls.Add(this.menuMain);
@@ -276,7 +278,6 @@
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.tlpMain);
             this.Controls.Add(this.grpFilters);
-            this.Controls.Add(this.txtSearch);
             this.Controls.Add(this.lblStaticIcaoDesignators);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuMain;
@@ -300,7 +301,6 @@
         #endregion
 
         private System.Windows.Forms.Label lblStaticIcaoDesignators;
-        private System.Windows.Forms.TextBox txtSearch;
         private System.Windows.Forms.GroupBox grpFilters;
         private System.Windows.Forms.DateTimePicker dtpFilterDatum;
         private System.Windows.Forms.CheckBox chkFilterDatum;
@@ -321,6 +321,7 @@
         private System.Windows.Forms.ToolStripMenuItem mapaToolStripMenuItem;
         private System.Windows.Forms.ContextMenuStrip cmsNotam;
         private System.Windows.Forms.ToolStripMenuItem tsmItemShowOnMap;
+        private System.Windows.Forms.ComboBox cmbSearch;
     }
 }
 

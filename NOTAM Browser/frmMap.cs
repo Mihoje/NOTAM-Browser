@@ -10,6 +10,8 @@ using NOTAM_Browser.MapProviders;
 using NOTAM_Browser.Properties;
 using System.Text.RegularExpressions;
 using GMap.NET.WindowsForms;
+using NOTAM_Browser.MapTypes;
+using GMap.NET;
 
 #if DEBUG
 using System.Diagnostics;
@@ -23,6 +25,7 @@ namespace NOTAM_Browser
         private readonly Dictionary<string, GMapProvider> mapProviders;
         private readonly PrintManager printManager;
 
+        #region "Constructor"
         public frmMap(Notams nos)
         {
             mapProviders = new Dictionary<string, GMapProvider>
@@ -44,6 +47,8 @@ namespace NOTAM_Browser
             this.nos = nos;
 
             InitializeComponent();
+
+            chkDisplayLevels.Checked = Settings.Default.displayVerticalBoundaries;
 
             cmbProvider.DataSource = new BindingSource(mapProviders, null);
             cmbProvider.DisplayMember = "Key";
@@ -95,7 +100,10 @@ namespace NOTAM_Browser
             this.LoadPolys();
 
             UpdateStatusBar();
+
+            //testNewFeatures();
         }
+        #endregion
 
         #region "Loading Polygons"
         private void createOverlayForZone(ZoneData zd)
@@ -127,11 +135,18 @@ namespace NOTAM_Browser
                 c = Color.FromArgb(255, 255, 255, 128); // Default to black if color is not specified correctly
             }
 
+            GMapLevelBlock lb = new GMapLevelBlock(new PointLatLng(zd.CenterCoordinate.Item1, zd.CenterCoordinate.Item2), zd.LowerLimit, zd.UpperLimit)
+            {
+                TextBrush = new SolidBrush(c),
+                IsVisible = chkDisplayLevels.Checked
+            };
+
             polygon.Stroke = new Pen(c, 2); // Red border
 
             var o = new GMap.NET.WindowsForms.GMapOverlay(zd.UID);
 
             o.Polygons.Add(polygon);
+            o.Markers.Add(lb);
 
             gMapControl1.Overlays.Add(o);
 
@@ -249,9 +264,8 @@ namespace NOTAM_Browser
 
         private void refreshMap()
         {
-            // TODO: ne pojavljuje se odmah, treba da se osveži mapa. ovo radi
-            gMapControl1.Zoom--;
-            gMapControl1.Zoom++;
+            if(this.Visible && gMapControl1.Visible)
+                gMapControl1.ReloadMap();
         }
 
         private void addTabForGroup(string groupName)
@@ -307,11 +321,14 @@ namespace NOTAM_Browser
             {
                 if (sender == null || !(sender is CheckedListBox)) return;
                 var checkListBox = sender as CheckedListBox;
-                if (checkListBox.Name != "chk_NOTAM") return;
+
+                bool isNotam = checkListBox.Name == "chk_NOTAM";
+
+                delPolyToolStripMenuItem.Enabled = isNotam;
 
                 if (checkListBox.SelectedItems.Count == 0) return;
 
-                ctxDelete.Show(checkListBox, e.Location);
+                ctxChkList.Show(checkListBox, e.Location);
             }
         }
 
@@ -330,14 +347,26 @@ namespace NOTAM_Browser
 
         public void DrawNotam(string NotamID)
         {
+            if (this.Enabled == false)
+            {
+                MessageBox.Show("Mapa je trenutno zaključana. Sačekajte da se otključa pa probajte ponovo.", "Mapa zaključana");
+                return;
+            }
+
+            this.Focus();
+
             string notamText = nos.CurrentNotams[NotamID];
 
             string notamName = NotamParser.GetNotamZoneName(notamText);
 
-            if (string.IsNullOrEmpty(notamName))
-                notamName = NotamID; // Fallback to NotamID if no name is found
-            else
-                notamName = $"{notamName} ({NotamID})"; // Append NotamID to the name
+            var zone = NotamParser.TryFindZone(notamText);
+
+            if (zone != null)                                   // U NOTAM-u je pronadjena zona iz postojecih
+                notamName = $"{zone.ZoneName} ({NotamID})";
+            else if (!string.IsNullOrEmpty(notamName))          // Pronadjen je naziv zone u zagradama
+                notamName = $"{notamName} ({NotamID})";
+            else                                                // nije nijedno
+                notamName = NotamID;
 
             string UID = $"NOTAM_{notamName}";
 
@@ -358,19 +387,53 @@ namespace NOTAM_Browser
 
             var coordinates = NotamParser.ParseCoordinates(notamText);
 
-            if (coordinates.Count == 0) return;
+            if (coordinates.Count == 0 && zone == null) return;
 
             var notamQCoordinate = NotamParser.GetNotamQCoordinate(notamText);
 
             var overlay = new GMapOverlay(UID);
 
-            GMap.NET.WindowsForms.GMapPolygon polygon = new GMap.NET.WindowsForms.GMapPolygon(NotamParser.ConvertCoordinatesForMap(coordinates), UID)
+            List<PointLatLng> poly;
+
+            Color c = Color.Red;
+
+            if (coordinates.Count > 0)
+            {
+                poly = NotamParser.ConvertCoordinatesForMap(coordinates);
+            }
+            else //if (zone != null) ali se podrazumeva da nije jer if iznad proverava
+            {
+                poly = zone.ZonePoints;
+
+                if(zone.Color.Count == 4)
+                {
+                    c = Color.FromArgb(zone.Color[0], zone.Color[1], zone.Color[2], zone.Color[3]);
+                }
+            }
+
+
+            GMapPolygon polygon = new GMapPolygon(poly, UID)
             {
                 Fill = Brushes.Transparent, // No fill color
-                Stroke = new Pen(Color.Red, 2) // Red border
+                Stroke = new Pen(c, 2) // Red border
+            };
+
+            string lowerLimit, uppperLimit;
+
+            (lowerLimit, uppperLimit) = NotamParser.GetNotamVerticalLimits(notamText);
+
+            PointLatLng notamQCoord = new PointLatLng() { Lat = notamQCoordinate.Item1, Lng = notamQCoordinate.Item2 };
+
+            GMapLevelBlock lb = new GMapLevelBlock(notamQCoord, lowerLimit, uppperLimit)
+            {
+                TextBrush = new SolidBrush(c),
+                LowerLimit = lowerLimit,
+                UpperLimit = uppperLimit,
+                IsVisible = chkDisplayLevels.Checked
             };
 
             overlay.Polygons.Add(polygon);
+            overlay.Markers.Add(lb);
 
             gMapControl1.Overlays.Add(overlay);
 
@@ -515,6 +578,22 @@ namespace NOTAM_Browser
 
             foreach (var overlay in gMapControl1.Overlays)
             {
+                string upperLimit = null;
+                string lowerLimit = null;
+                double centerLat = 0, centerLng = 0;
+
+                foreach (var marker in overlay.Markers)
+                {
+                    if (!(marker is GMapLevelBlock)) continue;
+
+                    var m = marker as GMapLevelBlock;
+
+                    upperLimit = m.UpperLimit;
+                    lowerLimit = m.LowerLimit;
+                    centerLat = m.Position.Lat;
+                    centerLng = m.Position.Lng;
+                }
+
                 foreach (var poly in overlay.Polygons)
                 {
                     string UID = poly.Name;
@@ -540,6 +619,9 @@ namespace NOTAM_Browser
                     {
                         Points = points,
                         Color = new List<int>() { c.A, c.R, c.G, c.B },
+                        UpperLimit = upperLimit,
+                        LowerLimit = lowerLimit,
+                        CenterCoordinate = (centerLat, centerLng),
                         Visible = visible
                     };
 
@@ -688,9 +770,16 @@ namespace NOTAM_Browser
 
                                 polygon.Stroke = new Pen(c, 2); // Red border
 
+                                GMapLevelBlock lb = new GMapLevelBlock(new PointLatLng(z.Value.CenterCoordinate.Item1, z.Value.CenterCoordinate.Item2), z.Value.LowerLimit, z.Value.UpperLimit)
+                                {
+                                    TextBrush = new SolidBrush(c),
+                                    IsVisible = chkDisplayLevels.Checked
+                                };
+
                                 var o = new GMap.NET.WindowsForms.GMapOverlay(z.Value.UID);
 
                                 o.Polygons.Add(polygon);
+                                o.Markers.Add(lb);
 
                                 o.IsVisibile = z.Value.Visible;
 
@@ -744,13 +833,13 @@ namespace NOTAM_Browser
 
         private void obrišToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var chkList = GetCheckedListForGroup("NOTAM");
+            if (!(ctxChkList.SourceControl is CheckedListBox)) return;
 
-            if (chkList == null) return;
+            if(ctxChkList.SourceControl.Name != "chk_NOTAM") return;
 
-            var selected = chkList.SelectedItem as Tuple<string, string>;
+            var chkList = ctxChkList.SourceControl as CheckedListBox;
 
-            if(selected == null) return;
+            if (!(chkList.SelectedItem is Tuple<string, string> selected)) return;
 
             chkList.Items.Remove(selected);
 
@@ -785,6 +874,92 @@ namespace NOTAM_Browser
         {
             frmEditPolys frmEditPolys = new frmEditPolys(this);
             frmEditPolys.ShowDialog();
+        }
+
+        private void chkDisplayLevels_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings.Default.displayVerticalBoundaries = chkDisplayLevels.Checked;
+            Settings.Default.Save();
+
+            foreach (var overlay in gMapControl1.Overlays)
+            {
+                foreach (var marker in overlay.Markers)
+                {
+                    if (marker is GMapLevelBlock levelBlock)
+                    {
+                        levelBlock.IsVisible = chkDisplayLevels.Checked;
+                    }
+                }
+            }
+        }
+
+        private void promeniBojuToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!(ctxChkList.SourceControl is CheckedListBox)) return;
+
+            var chkList = ctxChkList.SourceControl as CheckedListBox;
+
+            if (chkList.SelectedItem == null) return;
+
+            if (!(chkList.SelectedItem is Tuple<string, string> selected)) return;
+
+            GMapOverlay overlay = gMapControl1.Overlays.FirstOrDefault(x => x.Id == selected.Item1);
+
+            if(overlay == null) return;
+
+            GMapPolygon polygon = overlay.Polygons.FirstOrDefault(p => p.Name == selected.Item1);
+
+            if(polygon == null) return;
+
+            var markers = overlay.Markers.OfType<GMapLevelBlock>().ToList();
+
+            string group = selected.Item1.Substring(0, selected.Item1.IndexOf('_'));
+
+            var polys = MapManager.LoadPolys();
+
+            if (polys == null) return;
+
+            Color default_color = polys.Groups[group].DefaultColor;
+
+            Color c = polygon.Stroke.Color;
+
+            using(ColorDialog cd = new ColorDialog())
+            {
+                cd.Color = c;
+                cd.CustomColors = new int[] { ColorTranslator.ToWin32(default_color) };
+
+                if (cd.ShowDialog() == DialogResult.OK)
+                    c = cd.Color;
+                else
+                    return;
+            }
+
+            polygon.Stroke.Color = c;
+
+            foreach (var marker in markers)
+            {
+                marker.TextBrush = new SolidBrush(c);
+            }
+
+            var allZones = polys.AllZones;
+            
+            var zd = allZones.FirstOrDefault(g => g.Key == selected.Item1);
+
+            if (zd.Key == null || zd.Value == null)
+                return;
+
+            zd.Value.Color = new List<int>() { c.A, c.R, c.G, c.B };
+
+            Group gp = new Group();
+            gp.Polygons.Add(selected.Item2, zd.Value);
+
+            PolyData pd = new PolyData();
+
+            pd.Groups.Add(group, gp);
+
+            MapManager.AddPolys(pd);
+
+            refreshMap();
         }
     }
 }

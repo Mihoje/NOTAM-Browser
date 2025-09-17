@@ -55,11 +55,13 @@
             this.lblStaticPolygonName = new System.Windows.Forms.Label();
             this.txtPolygonName = new System.Windows.Forms.TextBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tabControlMain.SuspendLayout();
             this.tabAddPoly.SuspendLayout();
             this.grpCircle.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudCircleRadius)).BeginInit();
             this.grpPolygon.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControlMain
@@ -74,6 +76,7 @@
             // 
             // tabAddPoly
             // 
+            this.tabAddPoly.Controls.Add(this.pictureBox1);
             this.tabAddPoly.Controls.Add(this.grpCircle);
             this.tabAddPoly.Controls.Add(this.grpPolygon);
             this.tabAddPoly.Location = new System.Drawing.Point(4, 22);
@@ -328,6 +331,16 @@
             this.toolTip1.IsBalloon = true;
             this.toolTip1.ReshowDelay = 20;
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox1.InitialImage")));
+            this.pictureBox1.Location = new System.Drawing.Point(489, 314);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(251, 203);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 11;
+            this.pictureBox1.TabStop = false;
+            // 
             // frmEditPolys
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -347,6 +360,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudCircleRadius)).EndInit();
             this.grpPolygon.ResumeLayout(false);
             this.grpPolygon.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -378,5 +392,6 @@
         private System.Windows.Forms.Label lblStaticCircleRadius;
         private System.Windows.Forms.NumericUpDown nudCircleRadius;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }

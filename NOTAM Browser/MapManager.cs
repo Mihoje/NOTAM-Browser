@@ -6,6 +6,8 @@ using System.IO;
 using System.Windows.Forms;
 using System;
 using System.Drawing;
+using System.Linq;
+
 #if DEBUG
 using System.Diagnostics;
 #endif
@@ -263,6 +265,34 @@ namespace NOTAM_Browser
                 return output;
             } 
         }
+
+        [JsonIgnore]
+        public Dictionary<string, (string, string)> AllZoneNames
+        {
+            get
+            {
+                var output = new Dictionary<string, (string, string)>();
+                foreach (var g in Groups)
+                {
+                    if (g.Key == "NOTAM") continue; // Skip NOTAM group
+
+                    foreach (var p in g.Value.Polygons)
+                    {
+                        output.Add($"{g.Key}_{p.Key}", (g.Key, p.Key));
+                    }
+                }
+
+                return output
+                    .OrderByDescending(kv => {
+                        if (kv.Value.Item2.Contains('('))
+                        {
+                            return kv.Value.Item2.Split('(')[0].Trim().Length;
+                        }
+                        return kv.Value.Item2.Length; 
+                    })
+                    .ToDictionary(kv => kv.Key, kv => kv.Value);
+            }
+        }
         
         /// <summary>
         /// Invoked after the object has been deserialized to perform additional initialization.
@@ -375,6 +405,15 @@ namespace NOTAM_Browser
 
         [JsonProperty("points")]
         public List<List<double>> Points { get; set; }
+
+        [JsonProperty("lower_limit")]
+        public string LowerLimit { get; set; }
+
+        [JsonProperty("upper_limit")]
+        public string UpperLimit { get; set; }
+
+        [JsonProperty("center_coordinate")]
+        public (double, double) CenterCoordinate { get; set; }
 
         [JsonProperty("visible")]
         public bool Visible { get; set; }

@@ -41,15 +41,17 @@
             this.stsZoomLevel = new System.Windows.Forms.ToolStripStatusLabel();
             this.stsPosition = new System.Windows.Forms.ToolStripStatusLabel();
             this.listTabControl = new System.Windows.Forms.TabControl();
-            this.ctxDelete = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.obrišToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ctxChkList = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.promeniBojuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.delPolyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
             this.menuMain = new System.Windows.Forms.MenuStrip();
             this.zoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.upravljajZonamaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.chkDisplayLevels = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numZoomLevel)).BeginInit();
             this.statusStrip1.SuspendLayout();
-            this.ctxDelete.SuspendLayout();
+            this.ctxChkList.SuspendLayout();
             this.menuMain.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -75,7 +77,7 @@
             // btnLoadPolys
             // 
             this.btnLoadPolys.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLoadPolys.Location = new System.Drawing.Point(836, 27);
+            this.btnLoadPolys.Location = new System.Drawing.Point(874, 27);
             this.btnLoadPolys.Name = "btnLoadPolys";
             this.btnLoadPolys.Size = new System.Drawing.Size(102, 23);
             this.btnLoadPolys.TabIndex = 6;
@@ -129,9 +131,9 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.stsZoomLevel,
             this.stsPosition});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 568);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 643);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(950, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(988, 22);
             this.statusStrip1.TabIndex = 10;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -151,25 +153,33 @@
             // 
             this.listTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.listTabControl.Location = new System.Drawing.Point(636, 56);
+            this.listTabControl.Location = new System.Drawing.Point(674, 83);
             this.listTabControl.Name = "listTabControl";
             this.listTabControl.SelectedIndex = 0;
-            this.listTabControl.Size = new System.Drawing.Size(302, 501);
+            this.listTabControl.Size = new System.Drawing.Size(302, 549);
             this.listTabControl.TabIndex = 11;
             // 
-            // ctxDelete
+            // ctxChkList
             // 
-            this.ctxDelete.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.obrišToolStripMenuItem});
-            this.ctxDelete.Name = "ctxDelete";
-            this.ctxDelete.Size = new System.Drawing.Size(172, 26);
+            this.ctxChkList.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.promeniBojuToolStripMenuItem,
+            this.delPolyToolStripMenuItem});
+            this.ctxChkList.Name = "ctxDelete";
+            this.ctxChkList.Size = new System.Drawing.Size(181, 70);
             // 
-            // obrišToolStripMenuItem
+            // promeniBojuToolStripMenuItem
             // 
-            this.obrišToolStripMenuItem.Name = "obrišToolStripMenuItem";
-            this.obrišToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
-            this.obrišToolStripMenuItem.Text = "Obriši selektovano";
-            this.obrišToolStripMenuItem.Click += new System.EventHandler(this.obrišToolStripMenuItem_Click);
+            this.promeniBojuToolStripMenuItem.Name = "promeniBojuToolStripMenuItem";
+            this.promeniBojuToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.promeniBojuToolStripMenuItem.Text = "Promeni boju...";
+            this.promeniBojuToolStripMenuItem.Click += new System.EventHandler(this.promeniBojuToolStripMenuItem_Click);
+            // 
+            // delPolyToolStripMenuItem
+            // 
+            this.delPolyToolStripMenuItem.Name = "delPolyToolStripMenuItem";
+            this.delPolyToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.delPolyToolStripMenuItem.Text = "Obriši selektovano";
+            this.delPolyToolStripMenuItem.Click += new System.EventHandler(this.obrišToolStripMenuItem_Click);
             // 
             // gMapControl1
             // 
@@ -182,7 +192,7 @@
             this.gMapControl1.GrayScaleMode = false;
             this.gMapControl1.HelperLineOption = GMap.NET.WindowsForms.HelperLineOptions.DontShow;
             this.gMapControl1.LevelsKeepInMemory = 5;
-            this.gMapControl1.Location = new System.Drawing.Point(12, 56);
+            this.gMapControl1.Location = new System.Drawing.Point(12, 83);
             this.gMapControl1.MarkersEnabled = true;
             this.gMapControl1.MaxZoom = 18;
             this.gMapControl1.MinZoom = 2;
@@ -196,7 +206,7 @@
             this.gMapControl1.ScaleMode = GMap.NET.WindowsForms.ScaleModes.Integer;
             this.gMapControl1.SelectedAreaFillColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(65)))), ((int)(((byte)(105)))), ((int)(((byte)(225)))));
             this.gMapControl1.ShowTileGridLines = false;
-            this.gMapControl1.Size = new System.Drawing.Size(618, 501);
+            this.gMapControl1.Size = new System.Drawing.Size(656, 549);
             this.gMapControl1.TabIndex = 0;
             this.gMapControl1.Zoom = 9D;
             this.gMapControl1.OnPositionChanged += new GMap.NET.PositionChanged(this.gMapControl1_OnPositionChanged);
@@ -208,7 +218,7 @@
             this.zoneToolStripMenuItem});
             this.menuMain.Location = new System.Drawing.Point(0, 0);
             this.menuMain.Name = "menuMain";
-            this.menuMain.Size = new System.Drawing.Size(950, 24);
+            this.menuMain.Size = new System.Drawing.Size(988, 24);
             this.menuMain.TabIndex = 12;
             this.menuMain.Text = "menuStrip1";
             // 
@@ -223,15 +233,27 @@
             // upravljajZonamaToolStripMenuItem
             // 
             this.upravljajZonamaToolStripMenuItem.Name = "upravljajZonamaToolStripMenuItem";
-            this.upravljajZonamaToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.upravljajZonamaToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
             this.upravljajZonamaToolStripMenuItem.Text = "Upravljaj zonama...";
             this.upravljajZonamaToolStripMenuItem.Click += new System.EventHandler(this.upravljajZonamaToolStripMenuItem_Click);
+            // 
+            // chkDisplayLevels
+            // 
+            this.chkDisplayLevels.AutoSize = true;
+            this.chkDisplayLevels.Location = new System.Drawing.Point(12, 58);
+            this.chkDisplayLevels.Name = "chkDisplayLevels";
+            this.chkDisplayLevels.Size = new System.Drawing.Size(144, 17);
+            this.chkDisplayLevels.TabIndex = 13;
+            this.chkDisplayLevels.Text = "Prikaži vertikalne granice";
+            this.chkDisplayLevels.UseVisualStyleBackColor = true;
+            this.chkDisplayLevels.CheckedChanged += new System.EventHandler(this.chkDisplayLevels_CheckedChanged);
             // 
             // frmMap
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(950, 590);
+            this.ClientSize = new System.Drawing.Size(988, 665);
+            this.Controls.Add(this.chkDisplayLevels);
             this.Controls.Add(this.listTabControl);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuMain);
@@ -251,7 +273,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numZoomLevel)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
-            this.ctxDelete.ResumeLayout(false);
+            this.ctxChkList.ResumeLayout(false);
             this.menuMain.ResumeLayout(false);
             this.menuMain.PerformLayout();
             this.ResumeLayout(false);
@@ -272,10 +294,12 @@
         private System.Windows.Forms.ToolStripStatusLabel stsZoomLevel;
         private System.Windows.Forms.ToolStripStatusLabel stsPosition;
         private System.Windows.Forms.TabControl listTabControl;
-        private System.Windows.Forms.ContextMenuStrip ctxDelete;
-        private System.Windows.Forms.ToolStripMenuItem obrišToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip ctxChkList;
+        private System.Windows.Forms.ToolStripMenuItem delPolyToolStripMenuItem;
         private System.Windows.Forms.MenuStrip menuMain;
         private System.Windows.Forms.ToolStripMenuItem zoneToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem upravljajZonamaToolStripMenuItem;
+        private System.Windows.Forms.CheckBox chkDisplayLevels;
+        private System.Windows.Forms.ToolStripMenuItem promeniBojuToolStripMenuItem;
     }
 }

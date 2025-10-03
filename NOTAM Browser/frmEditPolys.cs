@@ -71,6 +71,11 @@ namespace NOTAM_Browser
 
                 poly.Color = new List<int>() { c.A, c.R, c.G, c.B };
 
+                poly.LowerLimit = txtPolyLowerLimit.Text.Trim();
+                poly.UpperLimit = txtPolyUpperLimit.Text.Trim();
+
+                poly.CenterCoordinate = (poly.Points[0][0], poly.Points[0][1]);
+                
                 poly.Visible = true;
             }
 
@@ -97,6 +102,9 @@ namespace NOTAM_Browser
 
             txtPolyCoordinates.Text = "";
             txtPolygonName.Text = "";
+            txtPolyLowerLimit.Text = "";
+            txtPolyLowerLimit.Text = "";
+            txtPolyCoordinatesConverted.Text = "";
         }
 
         private void pnlColor_Click(object sender, EventArgs e)
@@ -178,6 +186,10 @@ namespace NOTAM_Browser
 
                 poly.Color = new List<int>() { c.A, c.R, c.G, c.B };
 
+                poly.LowerLimit = txtCircleLowerLimit.Text.Trim();
+                poly.UpperLimit = txtCircleUpperLimit.Text.Trim();
+                poly.CenterCoordinate = (poly.Points[0][0], poly.Points[0][1]);
+
                 poly.Visible = true;
             }
 
@@ -204,6 +216,9 @@ namespace NOTAM_Browser
 
             txtCircleCoordinate.Text = "";
             txtCircleName.Text = "";
+            txtCircleLowerLimit.Text = "";
+            txtCircleUpperLimit.Text = "";
+            txtPolyCoordinatesConverted.Text = "";
         }
     }
 }

@@ -32,6 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmEditPolys));
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabAddPoly = new System.Windows.Forms.TabPage();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.grpCircle = new System.Windows.Forms.GroupBox();
             this.lblStaticCircleRadius = new System.Windows.Forms.Label();
             this.nudCircleRadius = new System.Windows.Forms.NumericUpDown();
@@ -55,13 +56,20 @@
             this.lblStaticPolygonName = new System.Windows.Forms.Label();
             this.txtPolygonName = new System.Windows.Forms.TextBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.lblStaticLowerLimit = new System.Windows.Forms.Label();
+            this.txtPolyLowerLimit = new System.Windows.Forms.TextBox();
+            this.lblStaticUpperLimit = new System.Windows.Forms.Label();
+            this.txtPolyUpperLimit = new System.Windows.Forms.TextBox();
+            this.lblStaticCircleUpperLimit = new System.Windows.Forms.Label();
+            this.txtCircleUpperLimit = new System.Windows.Forms.TextBox();
+            this.lblStaticCircleLowerLimit = new System.Windows.Forms.Label();
+            this.txtCircleLowerLimit = new System.Windows.Forms.TextBox();
             this.tabControlMain.SuspendLayout();
             this.tabAddPoly.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.grpCircle.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudCircleRadius)).BeginInit();
             this.grpPolygon.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControlMain
@@ -87,8 +95,22 @@
             this.tabAddPoly.Text = "Dodaj zonu";
             this.tabAddPoly.UseVisualStyleBackColor = true;
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox1.InitialImage")));
+            this.pictureBox1.Location = new System.Drawing.Point(489, 314);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(251, 203);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 11;
+            this.pictureBox1.TabStop = false;
+            // 
             // grpCircle
             // 
+            this.grpCircle.Controls.Add(this.lblStaticCircleUpperLimit);
+            this.grpCircle.Controls.Add(this.txtCircleUpperLimit);
+            this.grpCircle.Controls.Add(this.lblStaticCircleLowerLimit);
+            this.grpCircle.Controls.Add(this.txtCircleLowerLimit);
             this.grpCircle.Controls.Add(this.lblStaticCircleRadius);
             this.grpCircle.Controls.Add(this.nudCircleRadius);
             this.grpCircle.Controls.Add(this.btnAddCircle);
@@ -102,7 +124,7 @@
             this.grpCircle.Controls.Add(this.txtCircleCoordinate);
             this.grpCircle.Location = new System.Drawing.Point(458, 6);
             this.grpCircle.Name = "grpCircle";
-            this.grpCircle.Size = new System.Drawing.Size(318, 219);
+            this.grpCircle.Size = new System.Drawing.Size(318, 262);
             this.grpCircle.TabIndex = 10;
             this.grpCircle.TabStop = false;
             this.grpCircle.Text = "Kružna zona";
@@ -136,7 +158,7 @@
             65536});
             this.nudCircleRadius.Name = "nudCircleRadius";
             this.nudCircleRadius.Size = new System.Drawing.Size(172, 20);
-            this.nudCircleRadius.TabIndex = 14;
+            this.nudCircleRadius.TabIndex = 7;
             this.nudCircleRadius.Value = new decimal(new int[] {
             2,
             0,
@@ -145,10 +167,10 @@
             // 
             // btnAddCircle
             // 
-            this.btnAddCircle.Location = new System.Drawing.Point(6, 185);
+            this.btnAddCircle.Location = new System.Drawing.Point(6, 227);
             this.btnAddCircle.Name = "btnAddCircle";
             this.btnAddCircle.Size = new System.Drawing.Size(306, 23);
-            this.btnAddCircle.TabIndex = 13;
+            this.btnAddCircle.TabIndex = 12;
             this.btnAddCircle.Text = "Dodaj krug";
             this.btnAddCircle.UseVisualStyleBackColor = true;
             this.btnAddCircle.Click += new System.EventHandler(this.btnAddCircle_Click);
@@ -156,7 +178,7 @@
             // lblStaticCircleColor
             // 
             this.lblStaticCircleColor.AutoSize = true;
-            this.lblStaticCircleColor.Location = new System.Drawing.Point(274, 132);
+            this.lblStaticCircleColor.Location = new System.Drawing.Point(274, 174);
             this.lblStaticCircleColor.Name = "lblStaticCircleColor";
             this.lblStaticCircleColor.Size = new System.Drawing.Size(31, 13);
             this.lblStaticCircleColor.TabIndex = 12;
@@ -165,7 +187,7 @@
             // pnlCircleColor
             // 
             this.pnlCircleColor.BackColor = System.Drawing.Color.Red;
-            this.pnlCircleColor.Location = new System.Drawing.Point(277, 148);
+            this.pnlCircleColor.Location = new System.Drawing.Point(277, 190);
             this.pnlCircleColor.Name = "pnlCircleColor";
             this.pnlCircleColor.Size = new System.Drawing.Size(35, 20);
             this.pnlCircleColor.TabIndex = 11;
@@ -192,7 +214,7 @@
             // lblStaticCircleName
             // 
             this.lblStaticCircleName.AutoSize = true;
-            this.lblStaticCircleName.Location = new System.Drawing.Point(6, 132);
+            this.lblStaticCircleName.Location = new System.Drawing.Point(6, 174);
             this.lblStaticCircleName.Name = "lblStaticCircleName";
             this.lblStaticCircleName.Size = new System.Drawing.Size(63, 13);
             this.lblStaticCircleName.TabIndex = 8;
@@ -200,10 +222,10 @@
             // 
             // txtCircleName
             // 
-            this.txtCircleName.Location = new System.Drawing.Point(6, 148);
+            this.txtCircleName.Location = new System.Drawing.Point(6, 190);
             this.txtCircleName.Name = "txtCircleName";
             this.txtCircleName.Size = new System.Drawing.Size(265, 20);
-            this.txtCircleName.TabIndex = 7;
+            this.txtCircleName.TabIndex = 10;
             // 
             // txtCircleCoordinateConverted
             // 
@@ -213,7 +235,7 @@
             this.txtCircleCoordinateConverted.Name = "txtCircleCoordinateConverted";
             this.txtCircleCoordinateConverted.ReadOnly = true;
             this.txtCircleCoordinateConverted.Size = new System.Drawing.Size(306, 20);
-            this.txtCircleCoordinateConverted.TabIndex = 6;
+            this.txtCircleCoordinateConverted.TabIndex = 101;
             // 
             // txtCircleCoordinate
             // 
@@ -222,11 +244,15 @@
             this.txtCircleCoordinate.Location = new System.Drawing.Point(6, 39);
             this.txtCircleCoordinate.Name = "txtCircleCoordinate";
             this.txtCircleCoordinate.Size = new System.Drawing.Size(306, 20);
-            this.txtCircleCoordinate.TabIndex = 5;
+            this.txtCircleCoordinate.TabIndex = 6;
             this.txtCircleCoordinate.TextChanged += new System.EventHandler(this.txtCircleCoordinate_TextChanged);
             // 
             // grpPolygon
             // 
+            this.grpPolygon.Controls.Add(this.lblStaticUpperLimit);
+            this.grpPolygon.Controls.Add(this.txtPolyUpperLimit);
+            this.grpPolygon.Controls.Add(this.lblStaticLowerLimit);
+            this.grpPolygon.Controls.Add(this.txtPolyLowerLimit);
             this.grpPolygon.Controls.Add(this.lblStaticPolyCoordinates);
             this.grpPolygon.Controls.Add(this.lblStaticPolygonColor);
             this.grpPolygon.Controls.Add(this.txtPolyCoordinates);
@@ -266,7 +292,7 @@
             this.txtPolyCoordinates.Location = new System.Drawing.Point(16, 39);
             this.txtPolyCoordinates.Multiline = true;
             this.txtPolyCoordinates.Name = "txtPolyCoordinates";
-            this.txtPolyCoordinates.Size = new System.Drawing.Size(202, 461);
+            this.txtPolyCoordinates.Size = new System.Drawing.Size(202, 422);
             this.txtPolyCoordinates.TabIndex = 0;
             this.txtPolyCoordinates.TextChanged += new System.EventHandler(this.txtPolyCoordinates_TextChanged);
             // 
@@ -276,7 +302,7 @@
             this.pnlPolyColor.Location = new System.Drawing.Point(227, 525);
             this.pnlPolyColor.Name = "pnlPolyColor";
             this.pnlPolyColor.Size = new System.Drawing.Size(35, 20);
-            this.pnlPolyColor.TabIndex = 7;
+            this.pnlPolyColor.TabIndex = 4;
             this.pnlPolyColor.Click += new System.EventHandler(this.pnlColor_Click);
             // 
             // txtPolyCoordinatesConverted
@@ -285,8 +311,8 @@
             this.txtPolyCoordinatesConverted.Multiline = true;
             this.txtPolyCoordinatesConverted.Name = "txtPolyCoordinatesConverted";
             this.txtPolyCoordinatesConverted.ReadOnly = true;
-            this.txtPolyCoordinatesConverted.Size = new System.Drawing.Size(202, 461);
-            this.txtPolyCoordinatesConverted.TabIndex = 2;
+            this.txtPolyCoordinatesConverted.Size = new System.Drawing.Size(202, 422);
+            this.txtPolyCoordinatesConverted.TabIndex = 100;
             // 
             // lblStaticPolyRecognizedCoords
             // 
@@ -302,7 +328,7 @@
             this.btnAddPoly.Location = new System.Drawing.Point(268, 525);
             this.btnAddPoly.Name = "btnAddPoly";
             this.btnAddPoly.Size = new System.Drawing.Size(158, 23);
-            this.btnAddPoly.TabIndex = 3;
+            this.btnAddPoly.TabIndex = 5;
             this.btnAddPoly.Text = "Dodaj poligon";
             this.btnAddPoly.UseVisualStyleBackColor = true;
             this.btnAddPoly.Click += new System.EventHandler(this.btnAddPoly_Click);
@@ -321,7 +347,7 @@
             this.txtPolygonName.Location = new System.Drawing.Point(16, 525);
             this.txtPolygonName.Name = "txtPolygonName";
             this.txtPolygonName.Size = new System.Drawing.Size(202, 20);
-            this.txtPolygonName.TabIndex = 4;
+            this.txtPolygonName.TabIndex = 3;
             // 
             // toolTip1
             // 
@@ -331,15 +357,69 @@
             this.toolTip1.IsBalloon = true;
             this.toolTip1.ReshowDelay = 20;
             // 
-            // pictureBox1
+            // lblStaticLowerLimit
             // 
-            this.pictureBox1.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox1.InitialImage")));
-            this.pictureBox1.Location = new System.Drawing.Point(489, 314);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(251, 203);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 11;
-            this.pictureBox1.TabStop = false;
+            this.lblStaticLowerLimit.AutoSize = true;
+            this.lblStaticLowerLimit.Location = new System.Drawing.Point(16, 464);
+            this.lblStaticLowerLimit.Name = "lblStaticLowerLimit";
+            this.lblStaticLowerLimit.Size = new System.Drawing.Size(76, 13);
+            this.lblStaticLowerLimit.TabIndex = 10;
+            this.lblStaticLowerLimit.Text = "Donja granica:";
+            // 
+            // txtPolyLowerLimit
+            // 
+            this.txtPolyLowerLimit.Location = new System.Drawing.Point(16, 480);
+            this.txtPolyLowerLimit.Name = "txtPolyLowerLimit";
+            this.txtPolyLowerLimit.Size = new System.Drawing.Size(202, 20);
+            this.txtPolyLowerLimit.TabIndex = 1;
+            // 
+            // lblStaticUpperLimit
+            // 
+            this.lblStaticUpperLimit.AutoSize = true;
+            this.lblStaticUpperLimit.Location = new System.Drawing.Point(224, 464);
+            this.lblStaticUpperLimit.Name = "lblStaticUpperLimit";
+            this.lblStaticUpperLimit.Size = new System.Drawing.Size(79, 13);
+            this.lblStaticUpperLimit.TabIndex = 12;
+            this.lblStaticUpperLimit.Text = "Gornja granica:";
+            // 
+            // txtPolyUpperLimit
+            // 
+            this.txtPolyUpperLimit.Location = new System.Drawing.Point(224, 480);
+            this.txtPolyUpperLimit.Name = "txtPolyUpperLimit";
+            this.txtPolyUpperLimit.Size = new System.Drawing.Size(202, 20);
+            this.txtPolyUpperLimit.TabIndex = 2;
+            // 
+            // lblStaticCircleUpperLimit
+            // 
+            this.lblStaticCircleUpperLimit.AutoSize = true;
+            this.lblStaticCircleUpperLimit.Location = new System.Drawing.Point(165, 127);
+            this.lblStaticCircleUpperLimit.Name = "lblStaticCircleUpperLimit";
+            this.lblStaticCircleUpperLimit.Size = new System.Drawing.Size(79, 13);
+            this.lblStaticCircleUpperLimit.TabIndex = 19;
+            this.lblStaticCircleUpperLimit.Text = "Gornja granica:";
+            // 
+            // txtCircleUpperLimit
+            // 
+            this.txtCircleUpperLimit.Location = new System.Drawing.Point(168, 143);
+            this.txtCircleUpperLimit.Name = "txtCircleUpperLimit";
+            this.txtCircleUpperLimit.Size = new System.Drawing.Size(144, 20);
+            this.txtCircleUpperLimit.TabIndex = 9;
+            // 
+            // lblStaticCircleLowerLimit
+            // 
+            this.lblStaticCircleLowerLimit.AutoSize = true;
+            this.lblStaticCircleLowerLimit.Location = new System.Drawing.Point(6, 127);
+            this.lblStaticCircleLowerLimit.Name = "lblStaticCircleLowerLimit";
+            this.lblStaticCircleLowerLimit.Size = new System.Drawing.Size(76, 13);
+            this.lblStaticCircleLowerLimit.TabIndex = 17;
+            this.lblStaticCircleLowerLimit.Text = "Donja granica:";
+            // 
+            // txtCircleLowerLimit
+            // 
+            this.txtCircleLowerLimit.Location = new System.Drawing.Point(6, 143);
+            this.txtCircleLowerLimit.Name = "txtCircleLowerLimit";
+            this.txtCircleLowerLimit.Size = new System.Drawing.Size(139, 20);
+            this.txtCircleLowerLimit.TabIndex = 8;
             // 
             // frmEditPolys
             // 
@@ -355,12 +435,12 @@
             this.Text = "Upravljaj zonama";
             this.tabControlMain.ResumeLayout(false);
             this.tabAddPoly.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.grpCircle.ResumeLayout(false);
             this.grpCircle.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudCircleRadius)).EndInit();
             this.grpPolygon.ResumeLayout(false);
             this.grpPolygon.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -393,5 +473,13 @@
         private System.Windows.Forms.NumericUpDown nudCircleRadius;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label lblStaticUpperLimit;
+        private System.Windows.Forms.TextBox txtPolyUpperLimit;
+        private System.Windows.Forms.Label lblStaticLowerLimit;
+        private System.Windows.Forms.TextBox txtPolyLowerLimit;
+        private System.Windows.Forms.Label lblStaticCircleUpperLimit;
+        private System.Windows.Forms.TextBox txtCircleUpperLimit;
+        private System.Windows.Forms.Label lblStaticCircleLowerLimit;
+        private System.Windows.Forms.TextBox txtCircleLowerLimit;
     }
 }

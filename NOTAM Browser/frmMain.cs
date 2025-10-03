@@ -6,7 +6,6 @@ using System.Linq;
 using System.Windows.Forms;
 using NOTAM_Browser.Helpers;
 
-
 #if DEBUG
 using System.Diagnostics;
 #endif
@@ -455,9 +454,23 @@ namespace NOTAM_Browser
             }
         }
 
+        private void prikažiSveSelektovaneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (var chk in tlpMain.Controls.OfType<CheckBox>())
+            {
+
+                if (!chk.Name.StartsWith("chkNotam")) continue;
+
+                if (!chk.Checked) continue;
+
+                // remove "chkNotam"
+                string notamId = chk.Name.Substring(8);
+
+                mapForm.DrawNotam(notamId);
+            }
+        }
 
         #endregion
 
-        
     }
 }

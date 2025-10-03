@@ -12,6 +12,14 @@ using System.Text.RegularExpressions;
 using GMap.NET.WindowsForms;
 using NOTAM_Browser.MapTypes;
 using GMap.NET;
+using System.Security.Policy;
+using System.Configuration;
+using System.Xml.Linq;
+//using static System.Net.WebRequestMethods;
+
+
+
+
 
 #if DEBUG
 using System.Diagnostics;
@@ -24,6 +32,10 @@ namespace NOTAM_Browser
         private readonly Notams nos;
         private readonly Dictionary<string, GMapProvider> mapProviders;
         private readonly PrintManager printManager;
+
+        private string movingCenterNotamId;
+
+        private bool changingVisibilityToBatch = false;
 
         #region "Constructor"
         public frmMap(Notams nos)
@@ -47,6 +59,10 @@ namespace NOTAM_Browser
             this.nos = nos;
 
             InitializeComponent();
+
+            stsStatus.Visible = false;
+
+            changingVisibilityToBatch = true;
 
             chkDisplayLevels.Checked = Settings.Default.displayVerticalBoundaries;
 
@@ -101,7 +117,7 @@ namespace NOTAM_Browser
 
             UpdateStatusBar();
 
-            //testNewFeatures();
+            changingVisibilityToBatch = false;
         }
         #endregion
 
@@ -266,6 +282,15 @@ namespace NOTAM_Browser
         {
             if(this.Visible && gMapControl1.Visible)
                 gMapControl1.ReloadMap();
+
+            double zoom = gMapControl1.Zoom;
+
+            if (zoom == gMapControl1.MaxZoom)
+                gMapControl1.Zoom = gMapControl1.MinZoom;
+            else
+                gMapControl1.Zoom = gMapControl1.MaxZoom;
+
+            gMapControl1.Zoom = zoom;
         }
 
         private void addTabForGroup(string groupName)
@@ -315,6 +340,7 @@ namespace NOTAM_Browser
             checkListBox.MouseUp += checkListBox_MouseUp;
         }
 
+        // =================== ctxChkList show ===================
         private void checkListBox_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -322,11 +348,18 @@ namespace NOTAM_Browser
                 if (sender == null || !(sender is CheckedListBox)) return;
                 var checkListBox = sender as CheckedListBox;
 
-                bool isNotam = checkListBox.Name == "chk_NOTAM";
+                bool allowDelete = checkListBox.Name == "chk_NOTAM" || checkListBox.Name == "chk_Custom";
 
-                delPolyToolStripMenuItem.Enabled = isNotam;
+                bool itemSelected = checkListBox.SelectedItems.Count > 0;
 
-                if (checkListBox.SelectedItems.Count == 0) return;
+                if(!(allowDelete || itemSelected))
+                    return;
+
+                delPolyToolStripMenuItem.Enabled = allowDelete && itemSelected;
+                obrišiSveUListiToolStripMenuItem.Enabled = allowDelete;
+                promeniBojuToolStripMenuItem.Enabled = itemSelected;
+                pomeriPozicijuVertikalnihGranicaToolStripMenuItem.Enabled = allowDelete && itemSelected;
+                dodajKaoCustomZonuToolStripMenuItem.Enabled = !allowDelete && itemSelected;
 
                 ctxChkList.Show(checkListBox, e.Location);
             }
@@ -451,14 +484,30 @@ namespace NOTAM_Browser
 #endif
 
             this.Show();
+
+            SavePolys();
         }
 
         private void chkMapElements_ItemCheck(object sender, ItemCheckEventArgs e)
         {
+            if (changingVisibilityToBatch) return;
+
             int index = e.Index;
             bool isChecked = e.NewValue == CheckState.Checked;
             if (index < 0 || index >= ((CheckedListBox)sender).Items.Count) return;
             string name = ((Tuple<string, string>)((CheckedListBox)sender).Items[index]).Item1;
+
+            var polys = MapManager.LoadPolys();
+            ZoneData poly;
+
+            if (polys != null && (poly = polys.GetPolyFromId(name)) != null)
+            {
+                string group = name.Substring(0, name.IndexOf('_'));
+
+                poly.Visible = false;
+
+                MapManager.AddZone(name, poly);
+            }
             
             var overlay = gMapControl1.Overlays.FirstOrDefault(x => x.Id == name);
             if (overlay != null)
@@ -493,10 +542,38 @@ namespace NOTAM_Browser
 
             var chkList = lstBox[0] as CheckedListBox;
 
+            PolyData pd = MapManager.LoadPolys();
+
+            changingVisibilityToBatch = true;
+
+            ZoneData zd;
+            GMapOverlay ovr;
+            string zoneId;
+
             for (int i = 0; i < chkList.Items.Count; i++)
             {
+                zoneId = (chkList.Items[i] as Tuple<string, string>).Item1;
+
+                zd = pd.GetPolyFromId(zoneId);
+
+                if (zd != null)
+                    zd.Visible = true;
+
+                ovr = gMapControl1.Overlays.FirstOrDefault(x => x.Id == zoneId);
+
+                if(ovr != null)
+                    ovr.IsVisibile = true;
+
                 chkList.SetItemChecked(i, true);
             }
+
+            MapManager.SaveRawData(pd, true);
+
+            changingVisibilityToBatch = true;
+
+#if DEBUG
+            Debug.WriteLine($"frmMap: Saved all zones in {chkList.Name} to Visible");
+#endif
         }
 
         private void btnAllOff_Click(object sender, EventArgs e)
@@ -515,10 +592,38 @@ namespace NOTAM_Browser
 
             var chkList = lstBox[0] as CheckedListBox;
 
+            PolyData pd = MapManager.LoadPolys();
+
+            changingVisibilityToBatch = true;
+
+            ZoneData zd;
+            GMapOverlay ovr;
+            string zoneId;
+
             for (int i = 0; i < chkList.Items.Count; i++)
             {
+                zoneId = (chkList.Items[i] as Tuple<string, string>).Item1;
+
+                zd = pd.GetPolyFromId(zoneId);
+
+                if (zd != null)
+                    zd.Visible = false;
+
+                ovr = gMapControl1.Overlays.FirstOrDefault(x => x.Id == zoneId);
+
+                if (ovr != null)
+                    ovr.IsVisibile = false;
+
                 chkList.SetItemChecked(i, false);
             }
+
+            MapManager.SaveRawData(pd, true);
+
+            changingVisibilityToBatch = false;
+
+#if DEBUG
+            Debug.WriteLine($"frmMap: Saved all zones in {chkList.Name} to NOT Visible");
+#endif
         }
 
         private void cmbProvider_SelectedValueChanged(object sender, EventArgs e)
@@ -632,7 +737,7 @@ namespace NOTAM_Browser
                 }
             }
 
-            MapManager.SaveRawData(pd);
+            MapManager.SaveRawData(pd, true);
         }
 
         private CheckedListBox GetCheckedListForGroup(string groupName, bool createIfDoesNotExist = false)
@@ -688,7 +793,7 @@ namespace NOTAM_Browser
                         string json = File.ReadAllText(ofd.FileName);
                         PolyData polydata = JsonConvert.DeserializeObject<PolyData>(json);
 
-                        MapManager.AddPolys(polydata);
+                        MapManager.AddPolys(polydata, true);
 
                         // this is the shitties code i've seen in a while but it works for now.
                         foreach(var g in polydata.Groups)
@@ -714,6 +819,8 @@ namespace NOTAM_Browser
 
                                 continue;
                             }
+
+                            changingVisibilityToBatch = true;
 
                             var chkList = GetCheckedListForGroup(g.Key, true);
 
@@ -802,9 +909,14 @@ namespace NOTAM_Browser
 #endif
                         MessageBox.Show($"Greška pri učitavanju koordinata: {ex.Message}", "Greška", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
+                    finally
+                    {
+                        changingVisibilityToBatch = false;
+                    }
                 }
             }
         }
+
         private void btnPrint_Click(object sender, EventArgs e)
         {
             printManager.ZoomLevel = (int)numZoomLevel.Value;
@@ -835,7 +947,10 @@ namespace NOTAM_Browser
         {
             if (!(ctxChkList.SourceControl is CheckedListBox)) return;
 
-            if(ctxChkList.SourceControl.Name != "chk_NOTAM") return;
+            if(
+                ctxChkList.SourceControl.Name != "chk_NOTAM" &&
+                ctxChkList.SourceControl.Name != "chk_Custom"
+                ) return;
 
             var chkList = ctxChkList.SourceControl as CheckedListBox;
 
@@ -958,6 +1073,199 @@ namespace NOTAM_Browser
             pd.Groups.Add(group, gp);
 
             MapManager.AddPolys(pd);
+
+            refreshMap();
+        }
+
+        private void obrišiSveUListiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!(ctxChkList.SourceControl is CheckedListBox)) return;
+
+            if (
+                ctxChkList.SourceControl.Name != "chk_NOTAM" &&
+                ctxChkList.SourceControl.Name != "chk_Custom"
+                ) return;
+
+            var chkList = ctxChkList.SourceControl as CheckedListBox;
+
+            var pd = new PolyData();
+
+            string group, name;
+
+            Tuple<string, string> item;
+
+            for(int i = chkList.Items.Count - 1; i>= 0; i--)
+            {
+                item = chkList.Items[i] as Tuple<string, string>;
+
+                chkList.Items.RemoveAt(i);
+
+                group = item.Item1.Substring(0, item.Item1.IndexOf('_'));
+                name = item.Item2;
+
+                if (!pd.Groups.ContainsKey(group))
+                    pd.Groups.Add(group, new Group());
+                    
+                pd.Groups[group].Polygons.Add(name, null);
+
+                gMapControl1.Overlays.Remove(gMapControl1.Overlays.First(o => o.Id == item.Item1));
+            }
+
+            MapManager.AddPolys(pd);
+
+            refreshMap();
+        }
+
+        private void gMapControl1_DoubleClick(object sender, EventArgs e)
+        {
+            if (movingCenterNotamId == null) return;
+
+            Point local = gMapControl1.PointToClient(Control.MousePosition);
+
+            PointLatLng position = gMapControl1.FromLocalToLatLng(local.X, local.Y);
+
+            var overlay = gMapControl1.Overlays.FirstOrDefault(x => x.Id == movingCenterNotamId);
+            if (overlay != null)
+            {
+                if(overlay.Markers.Count > 0 && overlay.Markers[0] is GMapLevelBlock block)
+                {
+                    block.Position = position;
+                }
+            }
+
+            stsStatus.Visible = false;
+            pnlMapBorder.BackColor = SystemColors.Control;
+
+#if DEBUG
+            Debug.WriteLine($"frmMap: Set new center coordinate for {movingCenterNotamId} to {position.Lat}, {position.Lng}");
+#endif
+
+            movingCenterNotamId = null;
+
+            refreshMap();
+
+        }
+
+        private void pomeriPozicijuVertikalnihGranicaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!(ctxChkList.SourceControl is CheckedListBox)) return;
+
+            if (
+                ctxChkList.SourceControl.Name != "chk_NOTAM" &&
+                ctxChkList.SourceControl.Name != "chk_Custom"
+                ) return;
+
+            var chkList = ctxChkList.SourceControl as CheckedListBox;
+
+            if (!(chkList.SelectedItem is Tuple<string, string> selected)) return;
+
+            var pd = MapManager.LoadPolys();
+
+            movingCenterNotamId = pd.AllZones[selected.Item1].UID;
+
+            pnlMapBorder.BackColor = Color.Red;
+
+            stsStatus.ForeColor = Color.Red;
+            stsStatus.Text = "Dupli klik na mapu kako biste pomerili poziciju vertikalnih granica";
+            stsStatus.Visible = true;
+        }
+
+        private void dodajKaoCustomZonuToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!(ctxChkList.SourceControl is CheckedListBox)) return;
+
+            if (
+                ctxChkList.SourceControl.Name == "chk_NOTAM" ||
+                ctxChkList.SourceControl.Name == "chk_Custom"
+                ) return;
+
+            var chkList = ctxChkList.SourceControl as CheckedListBox;
+
+            if (!(chkList.SelectedItem is Tuple<string, string> selected)) return;
+
+            string uLimit, lLimit;
+
+            using(var frm = new frmLevelBlockInput())
+            {
+                frm.Title = "Unesite vertikalne granice";
+
+                if (frm.ShowDialog() != DialogResult.OK)
+                    return;
+
+                uLimit = frm.UpperLimit;
+                lLimit = frm.LowerLimit;
+            }
+
+            var pd = MapManager.LoadPolys();
+
+            var zd = pd.AllZones[selected.Item1];
+
+            if(
+                zd.Points.Count == 0 || 
+                zd.Points[0].Count != 2||
+                zd.Color == null ||
+                zd.Color.Count != 4
+                ) 
+                return;
+
+            string uid = $"Custom_{DateTime.Now.ToString("yyMMddHHmmss")} {zd.Name}";
+            string name = $"{DateTime.Now.ToString("yyMMddHHmmss")} {zd.Name}";
+
+            var overlay = gMapControl1.Overlays.FirstOrDefault(x => x.Id == uid);
+
+            if (overlay != null)
+                return;
+
+            var lat = zd.CenterCoordinate.Item1 == 0 ? zd.Points[0][0] : zd.CenterCoordinate.Item1;
+            var lon = zd.CenterCoordinate.Item2 == 0 ? zd.Points[0][1] : zd.CenterCoordinate.Item2;
+
+            var newZd = new ZoneData
+            {
+                UID = uid,
+                Name = name,
+                CenterCoordinate = (lat, lon),
+                Color = zd.Color,
+                LowerLimit = lLimit,
+                UpperLimit = uLimit,
+                Points = zd.Points,
+                Visible = zd.Visible
+            };
+
+            MapManager.AddZone(uid, newZd);
+
+            overlay = new GMapOverlay(uid);
+
+            var color = Color.FromArgb(zd.Color[0], zd.Color[1], zd.Color[2], zd.Color[3]);
+
+            var marker = new GMapLevelBlock(new PointLatLng(newZd.CenterCoordinate.Item1, newZd.CenterCoordinate.Item2), newZd.LowerLimit, newZd.UpperLimit, new SolidBrush(color));
+
+            var points = new List<PointLatLng>();
+
+            foreach ( var point in zd.Points )
+            {
+                if (point.Count != 2) return;
+
+                points.Add(new PointLatLng(point[0], point[1]));
+            }
+
+            var poly = new GMapPolygon(points, uid)
+            {
+                Fill = Brushes.Transparent, // No fill color
+                Stroke = new Pen(color, 2) // Red border
+            };
+
+            overlay.Polygons.Add(poly);
+            overlay.Markers.Add(marker);
+
+            var chk = GetCheckedListForGroup("Custom", true);
+
+            gMapControl1.Overlays.Add(overlay);
+
+            int index = chk.Items.Add(new Tuple<string, string>(uid, name), true);
+
+            listTabControl.SelectTab((TabPage)chk.Parent);
+
+            chk.SelectedIndex = index;
 
             refreshMap();
         }

@@ -9,7 +9,7 @@
       <Value Profile="(Default)">https://notams.aim.faa.gov/notamSearch/search</Value>
     </Setting>
     <Setting Name="urlAft" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">https://external-api.faa.gov/notamapi/v1/notams</Value>
     </Setting>
     <Setting Name="notamPre" Type="System.String" Scope="User">
       <Value Profile="(Default)">&lt;PRE&gt;</Value>
@@ -33,6 +33,15 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="searchHistory" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="notamSource" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="faaApiClientId" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="faaApiClientSecret" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

@@ -9,6 +9,11 @@ using System.Diagnostics;
 
 namespace NOTAM_Browser
 {
+    /*
+     * 
+     * TODO: Dosta whitespace ima ispod svih notama. Mora se to popraviti
+     * 
+     * */
     public partial class frmAckNotams : Form
     {
         private readonly Notams nos;

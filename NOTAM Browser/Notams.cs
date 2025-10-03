@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net.Http.Headers;
 using System.Linq;
+using System.Web;
+using static NOTAM_Browser.Notams;
+using NOTAM_Browser.Helpers;
+
+
 
 
 
@@ -29,7 +34,7 @@ namespace NOTAM_Browser
     {
         // private vars
         private const string FILENAME = "notams.json";
-        private readonly string NOTAMQUERY = $"{Settings.Default.urlPre ?? ""}";
+        //private readonly string NOTAMQUERY = $"{Settings.Default.urlPre ?? ""}";
         private readonly string NOTAM_DECODE_PRE = Settings.Default.notamPre ?? "";
         private readonly string NOTAM_DECODE_AFT = Settings.Default.notamAft ?? "";
         
@@ -162,7 +167,100 @@ namespace NOTAM_Browser
             return filteredNotams;
         }
 
+        public async Task GetFromInternetV3(string Designators)
+        {
+            if (BusyPullingNotams)
+            {
+#if DEBUG
+                Debug.WriteLine($"Notams: GetFromInternet called but there's already a task running. Aborting.");
+#endif
+                return;
+            }
+
+            BusyPullingNotams = true;
+
+            try
+            {
+
+                string[] locations = Designators.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                List<InternetNotamV3Root> rawDatas = new List<InternetNotamV3Root>();
+
+                using (var client = new HttpClient())
+                {
+
+                    var builder = new UriBuilder(SettingsManager.URL_AFT);
+                    var query = HttpUtility.ParseQueryString(builder.Query);
+
+                    query["pageSize"] = "1000";
+                    query["responseFormat"] = "geoJson";
+
+                    foreach (var loc in locations)
+                    {
+                        query["icaoLocation"] = loc;
+
+                        builder.Query = query.ToString();
+
+                        var request = new HttpRequestMessage(HttpMethod.Get, builder.ToString());
+
+                        request.Headers.Add("client_id", SettingsManager.FAA_API_CLIENT_ID);
+                        request.Headers.Add("client_secret", SettingsManager.FAA_API_CLIENT_SECRET);
+
+                        var response = await client.SendAsync(request);
+
+                        string httpResponse = await response.Content.ReadAsStringAsync();
+
+                        rawDatas.Add(JsonConvert.DeserializeObject<InternetNotamV3Root>(httpResponse));
+                    }
+                }
+
+                CurrentNotams.Clear();
+
+                foreach (var rawData in rawDatas)
+                {
+                    foreach (var notam in rawData.Items)
+                    {
+                        if (notam.Properties?.CoreNOTAMData?.NotamTranslation?.Count == 0) continue;
+
+                        CurrentNotams.Add($"{notam.Properties?.CoreNOTAMData?.Notam?.AffectedFIR}{notam.Properties?.CoreNOTAMData?.Notam?.Number}", notam.Properties.CoreNOTAMData.NotamTranslation[0].FormattedText);
+                    }
+                }
+
+                CurrentNotamsTime = DateTime.Now;
+                LastSearch = Designators;
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                MessageBox.Show($"Greška u toku dobijanja NOTAM-a: {ex.ToString()}");
+#else
+                MessageBox.Show($"Greška u toku dobijanja NOTAM-a: {ex.Message}");
+#endif
+            }
+            finally
+            {
+                BusyPullingNotams = false;
+            }
+        }
+
         public async Task GetFromInternet(string Designators)
+        {
+#if DEBUG
+            Debug.WriteLine($"Notams: Notam source: {SettingsManager.NOTAM_SOURCE}");
+#endif
+            if (SettingsManager.NOTAM_SOURCE == NotamSource.FaaApi)
+            {
+                await GetFromInternetV3(Designators);
+                return;
+            }
+            else if (SettingsManager.NOTAM_SOURCE == NotamSource.FaaPublic)
+            {
+                await GetFromInternetV2(Designators);
+                return;
+            }
+        }
+
+        public async Task GetFromInternetV2(string Designators)
         {
             if (BusyPullingNotams)
             {
@@ -194,7 +292,7 @@ namespace NOTAM_Browser
 
                     Debug.WriteLine(content.Headers);
 
-                    var response = await client.PostAsync(NOTAMQUERY, content);
+                    var response = await client.PostAsync(SettingsManager.URL_PRE, content);
 
                     if (!response.IsSuccessStatusCode)
                     {
@@ -244,7 +342,7 @@ namespace NOTAM_Browser
             BusyPullingNotams = true;
             try
             {
-                string URL = String.Format(NOTAMQUERY, Designators);
+                string URL = String.Format(SettingsManager.URL_PRE, Designators);
 
                 string httpResponse;
 
@@ -533,6 +631,159 @@ namespace NOTAM_Browser
             [JsonProperty("value")]
             public int Value { get; set; }
         }
+    
+
+        public class InternetNotamV3Root
+        {
+            [JsonProperty("pageSize")]
+            public int PageSize { get; set; }
+
+            [JsonProperty("pageNum")]
+            public int PageNum { get; set; }
+
+            [JsonProperty("totalCount")]
+            public int TotalCount { get; set; }
+
+            [JsonProperty("totalPages")]
+            public int TotalPages { get; set; }
+
+            [JsonProperty("items")]
+            public List<InternetNotamV3Item> Items { get; set; }
+        }
+
+        public class InternetNotamV3Item
+        {
+            [JsonProperty("type")]
+            public string Type { get; set; }
+
+            [JsonProperty("properties")]
+            public InternetNotamV3Properties Properties { get; set; }
+
+            [JsonProperty("geometry")]
+            public InternetNotamV3Geometry Geometry { get; set; }
+        }
+
+        public class InternetNotamV3Properties
+        {
+            [JsonProperty("coreNOTAMData")]
+            public InternetNotamV3CoreNOTAMData CoreNOTAMData { get; set; }
+        }
+
+        public class InternetNotamV3CoreNOTAMData
+        {
+            [JsonProperty("notamEvent")]
+            public InternetNotamV3NotamEvent NotamEvent { get; set; }
+
+            [JsonProperty("notam")]
+            public InternetNotamV3Notam Notam { get; set; }
+
+            [JsonProperty("notamTranslation")]
+            public List<InternetNotamV3NotamTranslation> NotamTranslation { get; set; }
+        }
+
+        public class InternetNotamV3NotamEvent
+        {
+            [JsonProperty("scenario")]
+            public string Scenario { get; set; }
+        }
+
+        public class InternetNotamV3Notam
+        {
+            [JsonProperty("id")]
+            public string Id { get; set; }
+
+            [JsonProperty("series")]
+            public string Series { get; set; }
+
+            [JsonProperty("number")]
+            public string Number { get; set; }
+
+            [JsonProperty("type")]
+            public string Type { get; set; }
+
+            [JsonProperty("issued")]
+            public DateTime Issued { get; set; }
+
+            [JsonProperty("affectedFIR")]
+            public string AffectedFIR { get; set; }
+
+            [JsonProperty("selectionCode")]
+            public string SelectionCode { get; set; }
+
+            [JsonProperty("traffic")]
+            public string Traffic { get; set; }
+
+            [JsonProperty("purpose")]
+            public string Purpose { get; set; }
+
+            [JsonProperty("scope")]
+            public string Scope { get; set; }
+
+            [JsonProperty("minimumFL")]
+            public string MinimumFL { get; set; }
+
+            [JsonProperty("maximumFL")]
+            public string MaximumFL { get; set; }
+
+            [JsonProperty("location")]
+            public string Location { get; set; }
+
+            [JsonProperty("effectiveStart")]
+            public DateTime EffectiveStart { get; set; }
+
+            // EffectiveEnd can be "PERM" or a date → keep string
+            [JsonProperty("effectiveEnd")]
+            public string EffectiveEnd { get; set; }
+
+            [JsonProperty("text")]
+            public string Text { get; set; }
+
+            [JsonProperty("classification")]
+            public string Classification { get; set; }
+
+            [JsonProperty("accountId")]
+            public string AccountId { get; set; }
+
+            [JsonProperty("lastUpdated")]
+            public DateTime LastUpdated { get; set; }
+
+            [JsonProperty("icaoLocation")]
+            public string IcaoLocation { get; set; }
+
+            [JsonProperty("coordinates")]
+            public string Coordinates { get; set; }
+
+            [JsonProperty("radius")]
+            public string Radius { get; set; }
+        }
+
+        public class InternetNotamV3NotamTranslation
+        {
+            [JsonProperty("type")]
+            public string Type { get; set; }
+
+            [JsonProperty("formattedText")]
+            public string FormattedText { get; set; }
+        }
+
+        public class InternetNotamV3Geometry
+        {
+            [JsonProperty("type")]
+            public string Type { get; set; }
+
+            [JsonProperty("geometries")]
+            public List<InternetNotamV3GeometryDetail> Geometries { get; set; }
+        }
+
+        public class InternetNotamV3GeometryDetail
+        {
+            [JsonProperty("type")]
+            public string Type { get; set; }
+
+            [JsonProperty("coordinates")]
+            public List<double> Coordinates { get; set; }
+        }
+
     }
 
 

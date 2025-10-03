@@ -26,7 +26,6 @@ namespace NOTAM_Browser
 #if EXCEPT
                 throw ex;
 #else
-                // Optionally log the error or handle it as needed
                 System.IO.File.WriteAllText("crash.log", $"{ex.Message}\n| {ex.StackTrace}");
 #endif
             }

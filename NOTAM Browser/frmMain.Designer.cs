@@ -52,6 +52,7 @@
             this.cmsNotam = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsmItemShowOnMap = new System.Windows.Forms.ToolStripMenuItem();
             this.cmbSearch = new System.Windows.Forms.ComboBox();
+            this.prikažiSveSelektovaneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.grpFilters.SuspendLayout();
             this.stsStripMain.SuspendLayout();
             this.menuMain.SuspendLayout();
@@ -244,14 +245,15 @@
             // cmsNotam
             // 
             this.cmsNotam.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsmItemShowOnMap});
+            this.tsmItemShowOnMap,
+            this.prikažiSveSelektovaneToolStripMenuItem});
             this.cmsNotam.Name = "cmsNotam";
-            this.cmsNotam.Size = new System.Drawing.Size(164, 26);
+            this.cmsNotam.Size = new System.Drawing.Size(203, 70);
             // 
             // tsmItemShowOnMap
             // 
             this.tsmItemShowOnMap.Name = "tsmItemShowOnMap";
-            this.tsmItemShowOnMap.Size = new System.Drawing.Size(163, 22);
+            this.tsmItemShowOnMap.Size = new System.Drawing.Size(202, 22);
             this.tsmItemShowOnMap.Text = "Prikaži na mapi...";
             this.tsmItemShowOnMap.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
@@ -264,6 +266,13 @@
             this.cmbSearch.TabIndex = 1;
             this.cmbSearch.TextChanged += new System.EventHandler(this.cmbSearch_TextChanged);
             this.cmbSearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cmbSearch_KeyDown);
+            // 
+            // prikažiSveSelektovaneToolStripMenuItem
+            // 
+            this.prikažiSveSelektovaneToolStripMenuItem.Name = "prikažiSveSelektovaneToolStripMenuItem";
+            this.prikažiSveSelektovaneToolStripMenuItem.Size = new System.Drawing.Size(202, 22);
+            this.prikažiSveSelektovaneToolStripMenuItem.Text = "Prikaži sve selektovane...";
+            this.prikažiSveSelektovaneToolStripMenuItem.Click += new System.EventHandler(this.prikažiSveSelektovaneToolStripMenuItem_Click);
             // 
             // frmMain
             // 
@@ -322,6 +331,7 @@
         private System.Windows.Forms.ContextMenuStrip cmsNotam;
         private System.Windows.Forms.ToolStripMenuItem tsmItemShowOnMap;
         private System.Windows.Forms.ComboBox cmbSearch;
+        private System.Windows.Forms.ToolStripMenuItem prikažiSveSelektovaneToolStripMenuItem;
     }
 }
 

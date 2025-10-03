@@ -381,6 +381,15 @@ namespace NOTAM_Browser
                 upperLimitEndIndex = NotamText.Length;
             }
 
+            if(
+                lowerLimitStartIndex == -1 || 
+                upperLimitStartIndex == -1 || 
+                lowerLimitEndIndex == -1
+                )
+            {
+                return (null, null);
+            }
+
             string lowerLimit = NotamText.Substring(lowerLimitStartIndex, lowerLimitEndIndex - lowerLimitStartIndex).Trim();
             string upperLimit = NotamText.Substring(upperLimitStartIndex, upperLimitEndIndex - upperLimitStartIndex).Trim();
 
@@ -411,6 +420,8 @@ namespace NOTAM_Browser
             int diff = notamText.Length - searchText.Length;
 
             var zones = MapManager.LoadPolys();
+
+            if (zones == null) return null;
 
             foreach (var item in zones.AllZoneNames)
             {

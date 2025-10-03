@@ -7,9 +7,41 @@ using System.Threading.Tasks;
 
 namespace NOTAM_Browser.Helpers
 {
+    internal enum NotamSource
+    {
+        None = -1,
+        FaaPublic = 0,
+        FaaApi = 1
+    }
+
     internal static class SettingsManager
     {
         public const int SEARCH_HISTORY_COUNT = 10;
+
+        public static string FAA_API_CLIENT_ID
+        {
+            get { return Settings.Default.faaApiClientId; }
+        }
+
+        public static string FAA_API_CLIENT_SECRET
+        {
+            get { return Settings.Default.faaApiClientSecret; }
+        }
+
+        public static NotamSource NOTAM_SOURCE
+        {
+            get { return (NotamSource)Settings.Default.notamSource; }
+        }
+
+        public static string URL_PRE
+        {
+            get { return Settings.Default.urlPre; }
+        }
+
+        public static string URL_AFT
+        {
+            get { return Settings.Default.urlAft; }
+        }
 
         #region "Search History"
         public static List<string> GetSearchHistory()

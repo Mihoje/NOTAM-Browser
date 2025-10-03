@@ -41,12 +41,20 @@
             this.btnReset = new System.Windows.Forms.Button();
             this.lblStaticMapyAPI = new System.Windows.Forms.Label();
             this.txtMapyApiKey = new System.Windows.Forms.TextBox();
+            this.lblStaticFaaClientId = new System.Windows.Forms.Label();
+            this.txtFaaApiClientId = new System.Windows.Forms.TextBox();
+            this.lblStaticFaaApiSecret = new System.Windows.Forms.Label();
+            this.txtFaaApiClientSecret = new System.Windows.Forms.TextBox();
+            this.grpNotamSource = new System.Windows.Forms.GroupBox();
+            this.radSrcDefault = new System.Windows.Forms.RadioButton();
+            this.radSrcApi = new System.Windows.Forms.RadioButton();
+            this.grpNotamSource.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnSave
             // 
             this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSave.Location = new System.Drawing.Point(336, 182);
+            this.btnSave.Location = new System.Drawing.Point(336, 294);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 0;
@@ -68,16 +76,16 @@
             this.lblStaticUrlPre.Name = "lblStaticUrlPre";
             this.lblStaticUrlPre.Size = new System.Drawing.Size(80, 13);
             this.lblStaticUrlPre.TabIndex = 2;
-            this.lblStaticUrlPre.Text = "Prvi deo URL-a";
+            this.lblStaticUrlPre.Text = "FAA Javni URL";
             // 
             // lblStaticUrlAft
             // 
             this.lblStaticUrlAft.AutoSize = true;
-            this.lblStaticUrlAft.Location = new System.Drawing.Point(30, 74);
+            this.lblStaticUrlAft.Location = new System.Drawing.Point(45, 74);
             this.lblStaticUrlAft.Name = "lblStaticUrlAft";
-            this.lblStaticUrlAft.Size = new System.Drawing.Size(87, 13);
+            this.lblStaticUrlAft.Size = new System.Drawing.Size(72, 13);
             this.lblStaticUrlAft.TabIndex = 4;
-            this.lblStaticUrlAft.Text = "Drugi deo URL-a";
+            this.lblStaticUrlAft.Text = "FAA API URL";
             // 
             // txtUrlAft
             // 
@@ -133,7 +141,7 @@
             // btnReset
             // 
             this.btnReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnReset.Location = new System.Drawing.Point(123, 182);
+            this.btnReset.Location = new System.Drawing.Point(123, 294);
             this.btnReset.Name = "btnReset";
             this.btnReset.Size = new System.Drawing.Size(75, 23);
             this.btnReset.TabIndex = 10;
@@ -157,11 +165,81 @@
             this.txtMapyApiKey.Size = new System.Drawing.Size(288, 20);
             this.txtMapyApiKey.TabIndex = 11;
             // 
+            // lblStaticFaaClientId
+            // 
+            this.lblStaticFaaClientId.AutoSize = true;
+            this.lblStaticFaaClientId.Location = new System.Drawing.Point(27, 178);
+            this.lblStaticFaaClientId.Name = "lblStaticFaaClientId";
+            this.lblStaticFaaClientId.Size = new System.Drawing.Size(90, 13);
+            this.lblStaticFaaClientId.TabIndex = 14;
+            this.lblStaticFaaClientId.Text = "FAA API Client ID";
+            // 
+            // txtFaaApiClientId
+            // 
+            this.txtFaaApiClientId.Location = new System.Drawing.Point(123, 175);
+            this.txtFaaApiClientId.Name = "txtFaaApiClientId";
+            this.txtFaaApiClientId.Size = new System.Drawing.Size(288, 20);
+            this.txtFaaApiClientId.TabIndex = 13;
+            // 
+            // lblStaticFaaApiSecret
+            // 
+            this.lblStaticFaaApiSecret.AutoSize = true;
+            this.lblStaticFaaApiSecret.Location = new System.Drawing.Point(7, 204);
+            this.lblStaticFaaApiSecret.Name = "lblStaticFaaApiSecret";
+            this.lblStaticFaaApiSecret.Size = new System.Drawing.Size(110, 13);
+            this.lblStaticFaaApiSecret.TabIndex = 16;
+            this.lblStaticFaaApiSecret.Text = "FAA API Client Secret";
+            // 
+            // txtFaaApiClientSecret
+            // 
+            this.txtFaaApiClientSecret.Location = new System.Drawing.Point(123, 201);
+            this.txtFaaApiClientSecret.Name = "txtFaaApiClientSecret";
+            this.txtFaaApiClientSecret.Size = new System.Drawing.Size(288, 20);
+            this.txtFaaApiClientSecret.TabIndex = 15;
+            // 
+            // grpNotamSource
+            // 
+            this.grpNotamSource.Controls.Add(this.radSrcApi);
+            this.grpNotamSource.Controls.Add(this.radSrcDefault);
+            this.grpNotamSource.Location = new System.Drawing.Point(123, 236);
+            this.grpNotamSource.Name = "grpNotamSource";
+            this.grpNotamSource.Size = new System.Drawing.Size(288, 49);
+            this.grpNotamSource.TabIndex = 17;
+            this.grpNotamSource.TabStop = false;
+            this.grpNotamSource.Text = "Izvor NOTAMa";
+            // 
+            // radSrcDefault
+            // 
+            this.radSrcDefault.AutoSize = true;
+            this.radSrcDefault.Location = new System.Drawing.Point(6, 19);
+            this.radSrcDefault.Name = "radSrcDefault";
+            this.radSrcDefault.Size = new System.Drawing.Size(73, 17);
+            this.radSrcDefault.TabIndex = 0;
+            this.radSrcDefault.TabStop = true;
+            this.radSrcDefault.Text = "FAA Javni";
+            this.radSrcDefault.UseVisualStyleBackColor = true;
+            // 
+            // radSrcApi
+            // 
+            this.radSrcApi.AutoSize = true;
+            this.radSrcApi.Location = new System.Drawing.Point(85, 19);
+            this.radSrcApi.Name = "radSrcApi";
+            this.radSrcApi.Size = new System.Drawing.Size(192, 17);
+            this.radSrcApi.TabIndex = 1;
+            this.radSrcApi.TabStop = true;
+            this.radSrcApi.Text = "FAA API (Potrebni ClientID i Secret)";
+            this.radSrcApi.UseVisualStyleBackColor = true;
+            // 
             // frmSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(419, 213);
+            this.ClientSize = new System.Drawing.Size(419, 325);
+            this.Controls.Add(this.grpNotamSource);
+            this.Controls.Add(this.lblStaticFaaApiSecret);
+            this.Controls.Add(this.txtFaaApiClientSecret);
+            this.Controls.Add(this.lblStaticFaaClientId);
+            this.Controls.Add(this.txtFaaApiClientId);
             this.Controls.Add(this.lblStaticMapyAPI);
             this.Controls.Add(this.txtMapyApiKey);
             this.Controls.Add(this.btnReset);
@@ -183,6 +261,8 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Napredna podešavanja";
             this.Load += new System.EventHandler(this.frmSettings_Load);
+            this.grpNotamSource.ResumeLayout(false);
+            this.grpNotamSource.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -203,5 +283,12 @@
         private System.Windows.Forms.Button btnReset;
         private System.Windows.Forms.Label lblStaticMapyAPI;
         private System.Windows.Forms.TextBox txtMapyApiKey;
+        private System.Windows.Forms.Label lblStaticFaaClientId;
+        private System.Windows.Forms.TextBox txtFaaApiClientId;
+        private System.Windows.Forms.Label lblStaticFaaApiSecret;
+        private System.Windows.Forms.TextBox txtFaaApiClientSecret;
+        private System.Windows.Forms.GroupBox grpNotamSource;
+        private System.Windows.Forms.RadioButton radSrcApi;
+        private System.Windows.Forms.RadioButton radSrcDefault;
     }
 }

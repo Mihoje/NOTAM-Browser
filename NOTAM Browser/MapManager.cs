@@ -7,6 +7,8 @@ using System.Windows.Forms;
 using System;
 using System.Drawing;
 using System.Linq;
+using GMap.NET.MapProviders;
+using System.Timers;
 
 #if DEBUG
 using System.Diagnostics;
@@ -20,6 +22,84 @@ namespace NOTAM_Browser
         private static string FILENAME = "polys.json";
         private static string fullFileName { get { return Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), FILENAME); } }
 
+        #region "Optimizing Saving"
+        private const int SAVE_TIMER_INTERVAL = 500;
+        private static System.Timers.Timer saveTimer;
+        private static PolyData _polyDataToSave;
+
+        private static void _saveCachedFile(object sender, ElapsedEventArgs e)
+        {
+            try
+            {
+                string jsonText = JsonConvert.SerializeObject(_polyDataToSave);
+
+                File.WriteAllText(fullFileName, jsonText);
+
+#if DEBUG
+                Debug.WriteLine($"MapManager: Actually wrote to file!");
+#endif
+            }
+            catch (Exception ex)
+            {
+# if DEBUG
+                Debug.WriteLine($"MapManager: Failed to write cached data to file: {ex}");
+#endif
+            }
+            /*finally
+            {
+                saveTimer.Stop();
+            }*/
+        }
+
+        static MapManager()
+        {
+            saveTimer = new System.Timers.Timer();
+            saveTimer.Enabled = false;
+            saveTimer.AutoReset = false;
+            saveTimer.Interval = SAVE_TIMER_INTERVAL;
+            saveTimer.Elapsed += _saveCachedFile;
+        }
+
+        private static void _saveFile(PolyData polyData, bool instant = false)
+        {
+            if (saveTimer.Enabled)
+            {
+                saveTimer.Stop();
+            }
+            
+            _polyDataToSave = polyData;
+
+
+            if (instant)
+                _saveCachedFile(null, null);
+            else
+                saveTimer.Start();
+        }
+        #endregion
+
+        #region "Loading"
+        private static PolyData _loadPolys() 
+        {
+            if (saveTimer.Enabled)
+                return _polyDataToSave;
+
+            try
+            {
+                string json = File.ReadAllText(fullFileName);
+
+                var pd = JsonConvert.DeserializeObject<PolyData>(json);
+
+                return pd;
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                Debug.WriteLine($"MapManager: General error deserializing zones from {FILENAME}: {ex.ToString()}\n\nTrying for V1.");
+#endif
+                return CheckForV1Json();
+            }
+        }
+        #endregion
 
         private static int tries = 0;
 
@@ -88,19 +168,7 @@ namespace NOTAM_Browser
                 return null;
             }
 
-            try
-            {
-                string json = File.ReadAllText(fullFileName);
-                PolyData data = JsonConvert.DeserializeObject<PolyData>(json);
-                return data;
-            }
-            catch(Exception ex)
-            {
-#if DEBUG
-                Debug.WriteLine($"MapManager: General error deserializing zones from {FILENAME}: {ex.ToString()}");
-#endif
-                return CheckForV1Json();
-            }
+            return _loadPolys();
         }
 
         /// <summary>
@@ -111,20 +179,9 @@ namespace NOTAM_Browser
         /// error occurs during serialization or file writing, the exception is caught and logged in debug
         /// mode.</remarks>
         /// <param name="polyData">The polygon data to be serialized and saved. Cannot be null.</param>
-        public static void SaveRawData(PolyData polyData)
+        public static void SaveRawData(PolyData polyData, bool instant = false)
         {
-            try
-            {
-                string jsonText = JsonConvert.SerializeObject(polyData);
-
-                File.WriteAllText(fullFileName, jsonText);
-            }
-            catch(Exception ex)
-            {
-# if DEBUG
-                Debug.WriteLine($"MapManager: Failed to write raw poly data to file: {ex}");
-#endif
-            }
+            _saveFile(polyData, instant);
         }
 
         /// <summary>
@@ -137,18 +194,17 @@ namespace NOTAM_Browser
         /// <paramref name="data"/> are added to the existing data.  If a group or polygon already exists, it is updated
         /// with the new values; otherwise, it is added. </para></remarks>
         /// <param name="data">The polygon data to add. Must not be <see langword="null"/> and must contain at least one group.</param>
-        public static void AddPolys(PolyData data)
+        public static void AddPolys(PolyData data, bool instant = false)
         {
             if (data == null || data.Groups.Count == 0) return;
-            string json;
+            
             PolyData existingData = new PolyData();
 
             if (File.Exists(fullFileName))
             {
                 try
                 {
-                    json = File.ReadAllText(fullFileName);
-                    existingData = JsonConvert.DeserializeObject<PolyData>(json);
+                    existingData = _loadPolys();
 
                     if (existingData == null) existingData = new PolyData();
                 }
@@ -190,21 +246,26 @@ namespace NOTAM_Browser
                 }
             }
 
-            json = JsonConvert.SerializeObject(existingData);
+            _saveFile(existingData, instant);
+        }
 
-            try
-            {
-                File.WriteAllText(fullFileName, json);
-#if DEBUG
-                Debug.WriteLine($"MapManager: Successfully wrote polygons to {FILENAME}.");
-#endif
-            }
-            catch (Exception ex)
-            {
-#if DEBUG
-                Debug.WriteLine($"MapManager: Error writing to {FILENAME}: {ex.ToString()}");
-#endif
-            }
+        public static void AddZone(string id, ZoneData zoneData)
+        {
+            if (!id.Contains('_')) return;
+
+            var pd = LoadPolys();
+
+            string groupName = id.Substring(0, id.IndexOf('_'));
+            string zoneName = id.Substring(groupName.Length + 1);
+
+            var group = new Group();
+            group.Name = groupName;
+            group.Polygons.Add(zoneName, zoneData);
+
+            var root = new PolyData();
+            root.Groups.Add(groupName, group);
+
+            AddPolys(root);
         }
     }
 

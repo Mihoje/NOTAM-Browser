@@ -49,7 +49,7 @@ namespace NOTAM_Browser.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://external-api.faa.gov/notamapi/v1/notams")]
         public string urlAft {
             get {
                 return ((string)(this["urlAft"]));
@@ -152,6 +152,42 @@ namespace NOTAM_Browser.Properties {
             }
             set {
                 this["searchHistory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int notamSource {
+            get {
+                return ((int)(this["notamSource"]));
+            }
+            set {
+                this["notamSource"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string faaApiClientId {
+            get {
+                return ((string)(this["faaApiClientId"]));
+            }
+            set {
+                this["faaApiClientId"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string faaApiClientSecret {
+            get {
+                return ((string)(this["faaApiClientSecret"]));
+            }
+            set {
+                this["faaApiClientSecret"] = value;
             }
         }
     }

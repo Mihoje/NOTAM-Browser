@@ -96,7 +96,7 @@ namespace NOTAM_Browser
                 }
             };
 
-            MapManager.AddPolys(pd);
+            MapManager.AddPolys(pd, true);
 
             parent.LoadPolys();
 
@@ -210,7 +210,7 @@ namespace NOTAM_Browser
                 }
             };
 
-            MapManager.AddPolys(pd);
+            MapManager.AddPolys(pd, true);
 
             parent.LoadPolys();
 

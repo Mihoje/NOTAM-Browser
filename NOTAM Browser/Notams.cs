@@ -288,9 +288,7 @@ namespace NOTAM_Browser
                     var content = new FormUrlEncodedContent(query);
 
                     content.Headers.Clear();
-                    content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");                    
-
-                    Debug.WriteLine(content.Headers);
+                    content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
 
                     var response = await client.PostAsync(SettingsManager.URL_PRE, content);
 

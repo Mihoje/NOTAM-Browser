@@ -95,8 +95,8 @@ namespace NOTAM_Browser
                 }
                 else if (match.Groups[17].Success) // Format: H DD.dddd H DDD.dddd
                 {
-                    double lat = double.Parse(match.Groups[18].Value.Replace(',', '.'));
-                    double lon = double.Parse(match.Groups[20].Value.Replace(',', '.'));
+                    double lat = double.Parse(match.Groups[18].Value.Replace(',', '.'), System.Globalization.CultureInfo.InvariantCulture);
+                    double lon = double.Parse(match.Groups[20].Value.Replace(',', '.'), System.Globalization.CultureInfo.InvariantCulture);
                     if (match.Groups[17].Value == "S") lat = -lat;
                     if (match.Groups[19].Value == "W") lon = -lon;
                     result.Add(new LatLon { Latitude = lat, Longitude = lon, ConvertedString = match.Value, Index = match.Index });
@@ -117,7 +117,7 @@ namespace NOTAM_Browser
                     result.Add(new LatLon { Latitude = lat, Longitude = lon, ConvertedString = match.Value, Index = match.Index });
                 }
 
-                if (radiusMeters.HasValue)
+                /*if (radiusMeters.HasValue)
                 {
                     // Generate a circle around the coordinate if radius is specified
                     var circleCoords = GenerateCircle(result.Last(), radiusMeters.Value);
@@ -126,7 +126,70 @@ namespace NOTAM_Browser
 
                     result.RemoveAt(result.Count - 1); // Remove the original point
                     result.AddRange(circleCoords);
+                }*/
+            }
+
+            // Sort coordinates by their appearance order in the NOTAM text
+            if (result.Count > 1)
+            {
+                result = result.OrderBy(r => r.Index).ToList();
+            }
+
+            // --- Handle single circular areas only ---
+            if (radiusMeters.HasValue && result.Count == 1)
+            {
+                var circle = GenerateCircle(result[0], radiusMeters.Value);
+                result = circle;
+            }
+
+            // --- ARC DETECTION AND GENERATION ---
+
+            // Find all arc definitions like “ARC OF A CIRCLE WITH A RADIUS OF 2.2NM CENTERED ON 435752N 0193426E”
+            var arcRegex = new Regex(
+                @"(CLOCKWISE|ANTICLOCKWISE|COUNTERCLOCKWISE)?\s*LINE.*?ARC OF A CIRCLE WITH A RADIUS OF\s+([\d.,]+)\s*NM\s+CENTERED ON\s+([0-9NSWE\s]+)",
+                RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+
+            var arcMatches = arcRegex.Matches(input);
+            if (arcMatches.Count > 0 && result.Count > 1)
+            {
+                var updated = new List<LatLon>(result);
+                foreach (Match arc in arcMatches)
+                {
+                    bool clockwise = !Regex.IsMatch(arc.Groups[1].Value, "ANTI|COUNTER", RegexOptions.IgnoreCase);
+                    double radiusNm = double.Parse(arc.Groups[2].Value.Replace(',', '.'), System.Globalization.CultureInfo.InvariantCulture);
+                    string centerText = arc.Groups[3].Value;
+
+                    var centerMatch = coordinateRegex.Match(centerText);
+                    if (!centerMatch.Success) continue;
+
+                    var center = new LatLon
+                    {
+                        Latitude = ToDecimalDegrees(centerMatch.Groups[1].Value, centerMatch.Groups[2].Value, centerMatch.Groups[3].Value, centerMatch.Groups[4].Value, centerMatch.Groups[5].Value),
+                        Longitude = ToDecimalDegrees(centerMatch.Groups[6].Value, centerMatch.Groups[7].Value, centerMatch.Groups[8].Value, centerMatch.Groups[9].Value, centerMatch.Groups[10].Value),
+                        ConvertedString = centerMatch.Value
+                    };
+
+                    // Find the closest coordinates before and after the arc text
+                    var before = result.LastOrDefault(c => c.Index < arc.Index);
+                    var after = result.FirstOrDefault(c => c.Index > arc.Index + arc.Length);
+                    if (before == null || after == null) continue;
+
+                    var arcPoints = GenerateArc(center, before, after, radiusNm * 1852, clockwise, 10);
+
+                    // Replace straight line segment with arc points
+                    int insertIndex = updated.FindIndex(c => c.Index == before.Index);
+                    if (insertIndex >= 0)
+                    {
+                        updated.InsertRange(insertIndex + 1, arcPoints);
+                    }
+
+                    var centerPoint = updated.FirstOrDefault(ll => ll.Latitude == center.Latitude && ll.Longitude == center.Longitude);
+
+                    if(centerPoint != null)
+                        updated.Remove(centerPoint);
                 }
+                result = updated;
             }
 
             return result;
@@ -147,10 +210,10 @@ namespace NOTAM_Browser
         /// southern or western hemispheres.</returns>
         private static double ToDecimalDegrees(string deg, string min, string sec, string fraction, string hemisphere)
         {
-            double degrees = double.Parse(deg);
-            double minutes = string.IsNullOrEmpty(min) ? 0 : double.Parse(min);
-            double seconds = string.IsNullOrEmpty(sec) ? 0 : double.Parse(sec);
-            double decimalPart = string.IsNullOrEmpty(fraction) ? 0 : double.Parse(fraction.Replace(',', '.'));
+            double degrees = double.Parse(deg, System.Globalization.CultureInfo.InvariantCulture);
+            double minutes = string.IsNullOrEmpty(min) ? 0 : double.Parse(min, System.Globalization.CultureInfo.InvariantCulture);
+            double seconds = string.IsNullOrEmpty(sec) ? 0 : double.Parse(sec, System.Globalization.CultureInfo.InvariantCulture);
+            double decimalPart = string.IsNullOrEmpty(fraction) ? 0 : double.Parse(fraction.Replace(',', '.'), System.Globalization.CultureInfo.InvariantCulture);
 
             if (!string.IsNullOrEmpty(fraction))
             {
@@ -212,6 +275,60 @@ namespace NOTAM_Browser
         }
 
         /// <summary>
+        /// Generates coordinates along an arc of a circle between two points, centered on a given coordinate.
+        /// </summary>
+        public static List<LatLon> GenerateArc(LatLon center, LatLon start, LatLon end, double radiusMeters, bool clockwise, int degreesPerPoint = 10)
+        {
+            //return new List<LatLon>() { start, center, end };
+            var results = new List<LatLon>();
+            double earthRadius = 6371000.0;
+
+            // Convert to radians
+            double latC = center.Latitude * Math.PI / 180.0;
+            double lonC = center.Longitude * Math.PI / 180.0;
+            double latS = start.Latitude * Math.PI / 180.0;
+            double lonS = start.Longitude * Math.PI / 180.0;
+            double latE = end.Latitude * Math.PI / 180.0;
+            double lonE = end.Longitude * Math.PI / 180.0;
+
+            double degPP = degreesPerPoint * Math.PI / 180.0;
+
+            // Compute initial and final bearings from center  θ=atan2(y−yc​,x−xc​)
+            double startBearing = Math.Atan2(Math.Sin(lonS - lonC) * Math.Cos(latS),
+                                            Math.Cos(latC) * Math.Sin(latS) - Math.Sin(latC) * Math.Cos(latS) * Math.Cos(lonS - lonC));
+            //double startBearing = Math.Atan2(lonS - lonC, latS - latC);
+            double endBearing = Math.Atan2(Math.Sin(lonE - lonC) * Math.Cos(latE),
+                                           Math.Cos(latC) * Math.Sin(latE) - Math.Sin(latC) * Math.Cos(latE) * Math.Cos(lonE - lonC));
+            //double endBearing = Math.Atan2(latE - lonC, lonE - latC);
+
+            if (clockwise && endBearing < startBearing) endBearing += 2 * Math.PI;
+            if (!clockwise && startBearing < endBearing) startBearing += 2 * Math.PI;
+
+            /*startBearing -= Math.PI / 2 - ((Math.PI / 180) * 5);
+            endBearing -= Math.PI / 2 - ((Math.PI / 180) * 5);*/
+
+            double points = (endBearing - startBearing) / degPP;
+
+            for (int i = 1; i < points; i++)
+            {
+                double bearing = startBearing + degPP * i * (clockwise ? 1 : -1);
+                double newLat = Math.Asin(Math.Sin(latC) * Math.Cos(radiusMeters / earthRadius) +
+                                          Math.Cos(latC) * Math.Sin(radiusMeters / earthRadius) * Math.Cos(bearing));
+                double newLon = lonC + Math.Atan2(Math.Sin(bearing) * Math.Sin(radiusMeters / earthRadius) * Math.Cos(latC),
+                                                  Math.Cos(radiusMeters / earthRadius) - Math.Sin(latC) * Math.Sin(newLat));
+
+                results.Add(new LatLon
+                {
+                    Latitude = newLat * 180.0 / Math.PI,
+                    Longitude = newLon * 180.0 / Math.PI
+                });
+            }
+
+            return results;
+        }
+
+
+        /// <summary>
         /// Extracts a radius value in meters from a given NOTAM text string.
         /// </summary>
         /// <remarks>Supported units are: <list type="bullet"> <item><description><c>NM</c>: Nautical
@@ -229,7 +346,7 @@ namespace NOTAM_Browser
             if (!radiusMatch.Success)
                 return null;
 
-            double value = double.Parse(radiusMatch.Groups[1].Value.Replace(',', '.'));
+            double value = double.Parse(radiusMatch.Groups[1].Value.Replace(',', '.'), System.Globalization.CultureInfo.InvariantCulture);
             string unit = radiusMatch.Groups[2].Value.ToUpper();
 
             switch (unit)
@@ -350,7 +467,7 @@ namespace NOTAM_Browser
 
             if (endIndex == -1) return null;
 
-            string zoneName = NotamText.Substring(startIndex + 1, endIndex - startIndex - 1).Trim();
+            string zoneName = NotamText.Substring(startIndex + 1, endIndex - startIndex - 1).Trim().Replace("\r", "").Replace("\n", " ");
 
             return zoneName;
         }

@@ -110,7 +110,7 @@ namespace NOTAM_Browser
 
             string[] coords = lastPos.Split(',');
 
-            gMapControl1.Position = new GMap.NET.PointLatLng(double.Parse(coords[0]), double.Parse(coords[1]));
+            gMapControl1.Position = new GMap.NET.PointLatLng(double.Parse(coords[0], System.Globalization.CultureInfo.InvariantCulture), double.Parse(coords[1], System.Globalization.CultureInfo.InvariantCulture));
             gMapControl1.Zoom = Settings.Default.lastMapZoom;
 
             this.LoadPolys();
@@ -394,10 +394,10 @@ namespace NOTAM_Browser
 
             var zone = NotamParser.TryFindZone(notamText);
 
-            if (zone != null)                                   // U NOTAM-u je pronadjena zona iz postojecih
-                notamName = $"{zone.ZoneName} ({NotamID})";
-            else if (!string.IsNullOrEmpty(notamName))          // Pronadjen je naziv zone u zagradama
+            if (!string.IsNullOrEmpty(notamName))           // Pronadjen je naziv zone u zagradama
                 notamName = $"{notamName} ({NotamID})";
+            else if (zone != null)                              // U NOTAM-u je pronadjena zona iz postojecih
+                notamName = $"{zone.ZoneName} ({NotamID})";
             else                                                // nije nijedno
                 notamName = NotamID;
 

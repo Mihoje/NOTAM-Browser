@@ -34,6 +34,10 @@
             this.tabAddPoly = new System.Windows.Forms.TabPage();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.grpCircle = new System.Windows.Forms.GroupBox();
+            this.lblStaticCircleUpperLimit = new System.Windows.Forms.Label();
+            this.txtCircleUpperLimit = new System.Windows.Forms.TextBox();
+            this.lblStaticCircleLowerLimit = new System.Windows.Forms.Label();
+            this.txtCircleLowerLimit = new System.Windows.Forms.TextBox();
             this.lblStaticCircleRadius = new System.Windows.Forms.Label();
             this.nudCircleRadius = new System.Windows.Forms.NumericUpDown();
             this.btnAddCircle = new System.Windows.Forms.Button();
@@ -46,6 +50,10 @@
             this.txtCircleCoordinateConverted = new System.Windows.Forms.TextBox();
             this.txtCircleCoordinate = new System.Windows.Forms.TextBox();
             this.grpPolygon = new System.Windows.Forms.GroupBox();
+            this.lblStaticUpperLimit = new System.Windows.Forms.Label();
+            this.txtPolyUpperLimit = new System.Windows.Forms.TextBox();
+            this.lblStaticLowerLimit = new System.Windows.Forms.Label();
+            this.txtPolyLowerLimit = new System.Windows.Forms.TextBox();
             this.lblStaticPolyCoordinates = new System.Windows.Forms.Label();
             this.lblStaticPolygonColor = new System.Windows.Forms.Label();
             this.txtPolyCoordinates = new System.Windows.Forms.TextBox();
@@ -56,14 +64,6 @@
             this.lblStaticPolygonName = new System.Windows.Forms.Label();
             this.txtPolygonName = new System.Windows.Forms.TextBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.lblStaticLowerLimit = new System.Windows.Forms.Label();
-            this.txtPolyLowerLimit = new System.Windows.Forms.TextBox();
-            this.lblStaticUpperLimit = new System.Windows.Forms.Label();
-            this.txtPolyUpperLimit = new System.Windows.Forms.TextBox();
-            this.lblStaticCircleUpperLimit = new System.Windows.Forms.Label();
-            this.txtCircleUpperLimit = new System.Windows.Forms.TextBox();
-            this.lblStaticCircleLowerLimit = new System.Windows.Forms.Label();
-            this.txtCircleLowerLimit = new System.Windows.Forms.TextBox();
             this.tabControlMain.SuspendLayout();
             this.tabAddPoly.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -129,6 +129,38 @@
             this.grpCircle.TabStop = false;
             this.grpCircle.Text = "Kružna zona";
             // 
+            // lblStaticCircleUpperLimit
+            // 
+            this.lblStaticCircleUpperLimit.AutoSize = true;
+            this.lblStaticCircleUpperLimit.Location = new System.Drawing.Point(165, 127);
+            this.lblStaticCircleUpperLimit.Name = "lblStaticCircleUpperLimit";
+            this.lblStaticCircleUpperLimit.Size = new System.Drawing.Size(79, 13);
+            this.lblStaticCircleUpperLimit.TabIndex = 19;
+            this.lblStaticCircleUpperLimit.Text = "Gornja granica:";
+            // 
+            // txtCircleUpperLimit
+            // 
+            this.txtCircleUpperLimit.Location = new System.Drawing.Point(168, 143);
+            this.txtCircleUpperLimit.Name = "txtCircleUpperLimit";
+            this.txtCircleUpperLimit.Size = new System.Drawing.Size(144, 20);
+            this.txtCircleUpperLimit.TabIndex = 9;
+            // 
+            // lblStaticCircleLowerLimit
+            // 
+            this.lblStaticCircleLowerLimit.AutoSize = true;
+            this.lblStaticCircleLowerLimit.Location = new System.Drawing.Point(6, 127);
+            this.lblStaticCircleLowerLimit.Name = "lblStaticCircleLowerLimit";
+            this.lblStaticCircleLowerLimit.Size = new System.Drawing.Size(76, 13);
+            this.lblStaticCircleLowerLimit.TabIndex = 17;
+            this.lblStaticCircleLowerLimit.Text = "Donja granica:";
+            // 
+            // txtCircleLowerLimit
+            // 
+            this.txtCircleLowerLimit.Location = new System.Drawing.Point(6, 143);
+            this.txtCircleLowerLimit.Name = "txtCircleLowerLimit";
+            this.txtCircleLowerLimit.Size = new System.Drawing.Size(139, 20);
+            this.txtCircleLowerLimit.TabIndex = 8;
+            // 
             // lblStaticCircleRadius
             // 
             this.lblStaticCircleRadius.AutoSize = true;
@@ -140,6 +172,7 @@
             // 
             // nudCircleRadius
             // 
+            this.nudCircleRadius.DecimalPlaces = 1;
             this.nudCircleRadius.Increment = new decimal(new int[] {
             1,
             0,
@@ -269,6 +302,38 @@
             this.grpPolygon.TabStop = false;
             this.grpPolygon.Text = "Poligon zona";
             // 
+            // lblStaticUpperLimit
+            // 
+            this.lblStaticUpperLimit.AutoSize = true;
+            this.lblStaticUpperLimit.Location = new System.Drawing.Point(224, 464);
+            this.lblStaticUpperLimit.Name = "lblStaticUpperLimit";
+            this.lblStaticUpperLimit.Size = new System.Drawing.Size(79, 13);
+            this.lblStaticUpperLimit.TabIndex = 12;
+            this.lblStaticUpperLimit.Text = "Gornja granica:";
+            // 
+            // txtPolyUpperLimit
+            // 
+            this.txtPolyUpperLimit.Location = new System.Drawing.Point(224, 480);
+            this.txtPolyUpperLimit.Name = "txtPolyUpperLimit";
+            this.txtPolyUpperLimit.Size = new System.Drawing.Size(202, 20);
+            this.txtPolyUpperLimit.TabIndex = 2;
+            // 
+            // lblStaticLowerLimit
+            // 
+            this.lblStaticLowerLimit.AutoSize = true;
+            this.lblStaticLowerLimit.Location = new System.Drawing.Point(16, 464);
+            this.lblStaticLowerLimit.Name = "lblStaticLowerLimit";
+            this.lblStaticLowerLimit.Size = new System.Drawing.Size(76, 13);
+            this.lblStaticLowerLimit.TabIndex = 10;
+            this.lblStaticLowerLimit.Text = "Donja granica:";
+            // 
+            // txtPolyLowerLimit
+            // 
+            this.txtPolyLowerLimit.Location = new System.Drawing.Point(16, 480);
+            this.txtPolyLowerLimit.Name = "txtPolyLowerLimit";
+            this.txtPolyLowerLimit.Size = new System.Drawing.Size(202, 20);
+            this.txtPolyLowerLimit.TabIndex = 1;
+            // 
             // lblStaticPolyCoordinates
             // 
             this.lblStaticPolyCoordinates.AutoSize = true;
@@ -356,70 +421,6 @@
             this.toolTip1.InitialDelay = 100;
             this.toolTip1.IsBalloon = true;
             this.toolTip1.ReshowDelay = 20;
-            // 
-            // lblStaticLowerLimit
-            // 
-            this.lblStaticLowerLimit.AutoSize = true;
-            this.lblStaticLowerLimit.Location = new System.Drawing.Point(16, 464);
-            this.lblStaticLowerLimit.Name = "lblStaticLowerLimit";
-            this.lblStaticLowerLimit.Size = new System.Drawing.Size(76, 13);
-            this.lblStaticLowerLimit.TabIndex = 10;
-            this.lblStaticLowerLimit.Text = "Donja granica:";
-            // 
-            // txtPolyLowerLimit
-            // 
-            this.txtPolyLowerLimit.Location = new System.Drawing.Point(16, 480);
-            this.txtPolyLowerLimit.Name = "txtPolyLowerLimit";
-            this.txtPolyLowerLimit.Size = new System.Drawing.Size(202, 20);
-            this.txtPolyLowerLimit.TabIndex = 1;
-            // 
-            // lblStaticUpperLimit
-            // 
-            this.lblStaticUpperLimit.AutoSize = true;
-            this.lblStaticUpperLimit.Location = new System.Drawing.Point(224, 464);
-            this.lblStaticUpperLimit.Name = "lblStaticUpperLimit";
-            this.lblStaticUpperLimit.Size = new System.Drawing.Size(79, 13);
-            this.lblStaticUpperLimit.TabIndex = 12;
-            this.lblStaticUpperLimit.Text = "Gornja granica:";
-            // 
-            // txtPolyUpperLimit
-            // 
-            this.txtPolyUpperLimit.Location = new System.Drawing.Point(224, 480);
-            this.txtPolyUpperLimit.Name = "txtPolyUpperLimit";
-            this.txtPolyUpperLimit.Size = new System.Drawing.Size(202, 20);
-            this.txtPolyUpperLimit.TabIndex = 2;
-            // 
-            // lblStaticCircleUpperLimit
-            // 
-            this.lblStaticCircleUpperLimit.AutoSize = true;
-            this.lblStaticCircleUpperLimit.Location = new System.Drawing.Point(165, 127);
-            this.lblStaticCircleUpperLimit.Name = "lblStaticCircleUpperLimit";
-            this.lblStaticCircleUpperLimit.Size = new System.Drawing.Size(79, 13);
-            this.lblStaticCircleUpperLimit.TabIndex = 19;
-            this.lblStaticCircleUpperLimit.Text = "Gornja granica:";
-            // 
-            // txtCircleUpperLimit
-            // 
-            this.txtCircleUpperLimit.Location = new System.Drawing.Point(168, 143);
-            this.txtCircleUpperLimit.Name = "txtCircleUpperLimit";
-            this.txtCircleUpperLimit.Size = new System.Drawing.Size(144, 20);
-            this.txtCircleUpperLimit.TabIndex = 9;
-            // 
-            // lblStaticCircleLowerLimit
-            // 
-            this.lblStaticCircleLowerLimit.AutoSize = true;
-            this.lblStaticCircleLowerLimit.Location = new System.Drawing.Point(6, 127);
-            this.lblStaticCircleLowerLimit.Name = "lblStaticCircleLowerLimit";
-            this.lblStaticCircleLowerLimit.Size = new System.Drawing.Size(76, 13);
-            this.lblStaticCircleLowerLimit.TabIndex = 17;
-            this.lblStaticCircleLowerLimit.Text = "Donja granica:";
-            // 
-            // txtCircleLowerLimit
-            // 
-            this.txtCircleLowerLimit.Location = new System.Drawing.Point(6, 143);
-            this.txtCircleLowerLimit.Name = "txtCircleLowerLimit";
-            this.txtCircleLowerLimit.Size = new System.Drawing.Size(139, 20);
-            this.txtCircleLowerLimit.TabIndex = 8;
             // 
             // frmEditPolys
             // 

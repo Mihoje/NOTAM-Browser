@@ -387,7 +387,7 @@ namespace NOTAM_Browser
 
         public ZoneData GetPolyFromId(string id)
         {
-            if(!AllZones.ContainsKey(id)) return null;
+            if(/*string.IsNullOrEmpty(id) || */!AllZones.ContainsKey(id)) return null;
 
             return AllZones[id];
         }

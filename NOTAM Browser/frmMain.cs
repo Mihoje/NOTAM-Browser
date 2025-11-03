@@ -162,7 +162,7 @@ namespace NOTAM_Browser
                     txt.SelectionFont = new Font(txt.Font, FontStyle.Underline);
                 }
 
-                if (zone != null)
+                if (zone != null && coordinates.Count == 0)
                 {
                     if (string.IsNullOrEmpty(zone.ConvertedString)) continue;
 

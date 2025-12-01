@@ -47,17 +47,20 @@
             this.promeniBojuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.delPolyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.obrišiSveUListiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dodajKaoCustomZonuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gMapControl1 = new GMap.NET.WindowsForms.GMapControl();
             this.pnlMapBorder = new System.Windows.Forms.Panel();
             this.menuMain = new System.Windows.Forms.MenuStrip();
             this.zoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.upravljajZonamaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chkDisplayLevels = new System.Windows.Forms.CheckBox();
-            this.dodajKaoCustomZonuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblStaticTextSize = new System.Windows.Forms.Label();
+            this.nudTextSize = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.numZoomLevel)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.ctxChkList.SuspendLayout();
             this.menuMain.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudTextSize)).BeginInit();
             this.SuspendLayout();
             // 
             // cmbProvider
@@ -182,7 +185,7 @@
             this.obrišiSveUListiToolStripMenuItem,
             this.dodajKaoCustomZonuToolStripMenuItem});
             this.ctxChkList.Name = "ctxDelete";
-            this.ctxChkList.Size = new System.Drawing.Size(257, 136);
+            this.ctxChkList.Size = new System.Drawing.Size(257, 114);
             // 
             // pomeriPozicijuVertikalnihGranicaToolStripMenuItem
             // 
@@ -211,6 +214,13 @@
             this.obrišiSveUListiToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
             this.obrišiSveUListiToolStripMenuItem.Text = "Obriši sve u listi";
             this.obrišiSveUListiToolStripMenuItem.Click += new System.EventHandler(this.obrišiSveUListiToolStripMenuItem_Click);
+            // 
+            // dodajKaoCustomZonuToolStripMenuItem
+            // 
+            this.dodajKaoCustomZonuToolStripMenuItem.Name = "dodajKaoCustomZonuToolStripMenuItem";
+            this.dodajKaoCustomZonuToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
+            this.dodajKaoCustomZonuToolStripMenuItem.Text = "Dodaj kao custom zonu";
+            this.dodajKaoCustomZonuToolStripMenuItem.Click += new System.EventHandler(this.dodajKaoCustomZonuToolStripMenuItem_Click);
             // 
             // gMapControl1
             // 
@@ -291,18 +301,40 @@
             this.chkDisplayLevels.UseVisualStyleBackColor = true;
             this.chkDisplayLevels.CheckedChanged += new System.EventHandler(this.chkDisplayLevels_CheckedChanged);
             // 
-            // dodajKaoCustomZonuToolStripMenuItem
+            // lblStaticTextSize
             // 
-            this.dodajKaoCustomZonuToolStripMenuItem.Name = "dodajKaoCustomZonuToolStripMenuItem";
-            this.dodajKaoCustomZonuToolStripMenuItem.Size = new System.Drawing.Size(256, 22);
-            this.dodajKaoCustomZonuToolStripMenuItem.Text = "Dodaj kao custom zonu";
-            this.dodajKaoCustomZonuToolStripMenuItem.Click += new System.EventHandler(this.dodajKaoCustomZonuToolStripMenuItem_Click);
+            this.lblStaticTextSize.AutoSize = true;
+            this.lblStaticTextSize.Location = new System.Drawing.Point(299, 59);
+            this.lblStaticTextSize.Name = "lblStaticTextSize";
+            this.lblStaticTextSize.Size = new System.Drawing.Size(75, 13);
+            this.lblStaticTextSize.TabIndex = 16;
+            this.lblStaticTextSize.Text = "Veličina slova:";
+            // 
+            // nudTextSize
+            // 
+            this.nudTextSize.Location = new System.Drawing.Point(380, 55);
+            this.nudTextSize.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.nudTextSize.Name = "nudTextSize";
+            this.nudTextSize.Size = new System.Drawing.Size(49, 20);
+            this.nudTextSize.TabIndex = 15;
+            this.nudTextSize.Value = new decimal(new int[] {
+            20,
+            0,
+            0,
+            0});
+            this.nudTextSize.ValueChanged += new System.EventHandler(this.nudTextSize_ValueChanged);
             // 
             // frmMap
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(988, 665);
+            this.Controls.Add(this.lblStaticTextSize);
+            this.Controls.Add(this.nudTextSize);
             this.Controls.Add(this.chkDisplayLevels);
             this.Controls.Add(this.listTabControl);
             this.Controls.Add(this.statusStrip1);
@@ -327,6 +359,7 @@
             this.ctxChkList.ResumeLayout(false);
             this.menuMain.ResumeLayout(false);
             this.menuMain.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudTextSize)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -357,5 +390,7 @@
         private System.Windows.Forms.ToolStripMenuItem pomeriPozicijuVertikalnihGranicaToolStripMenuItem;
         private System.Windows.Forms.Panel pnlMapBorder;
         private System.Windows.Forms.ToolStripMenuItem dodajKaoCustomZonuToolStripMenuItem;
+        private System.Windows.Forms.Label lblStaticTextSize;
+        private System.Windows.Forms.NumericUpDown nudTextSize;
     }
 }

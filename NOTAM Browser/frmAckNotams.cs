@@ -12,10 +12,13 @@ namespace NOTAM_Browser
     /*
      * 
      * TODO: Dosta whitespace ima ispod svih notama. Mora se to popraviti
+     * TODO: Treba napraviti da se pokacuje N notama i da ima pages koji se mogu listati
      * 
      * */
     public partial class frmAckNotams : Form
     {
+        public int LoadedNotamsCount { get; private set; }
+
         private readonly Notams nos;
         public frmAckNotams(Notams nos)
         {
@@ -23,10 +26,17 @@ namespace NOTAM_Browser
 
             this.nos = nos;
 
-            showNotams(this.nos.AcknowledgedNotams);
+            LoadedNotamsCount = 0;
+
+            //showNotams(this.nos.AcknowledgedNotams);
 
             this.nos.NotamAcknowledged += NewNotamAcknowledged;
             this.nos.NotamUnacknowledged += NewNotamUnacknowledged;
+        }
+
+        public void LoadNotams()
+        {
+            showNotams(nos.AcknowledgedNotams);
         }
 
         private void NewNotamUnacknowledged(string NotamID)
@@ -90,11 +100,15 @@ namespace NOTAM_Browser
             tlpMain.RowStyles.Clear();
             tlpMain.Controls.Clear();
             tlpMain.RowCount = 0;
+            LoadedNotamsCount = 0;
 
+            tlpMain.SuspendLayout();
             foreach (var notam in Notams)
             {
                 addNotamRow(notam.Key, notam.Value);
+                LoadedNotamsCount++;
             }
+            tlpMain.ResumeLayout();
         }
 
         private string NormalizeNewLines(string text)

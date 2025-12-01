@@ -21,6 +21,29 @@ namespace NOTAM_Browser
     @"(\d{2})(\d{2})([NS])(\d{3})(\d{2})([EW])\b",                                                                         // Format 4: DDMMNDDDMME
     RegexOptions.Compiled);
 
+        /*
+         * 
+         * A6839/25 NOTAMN
+Q) LYBA/QRACA/IV/NBO/W /000/010/4540N01859E003
+A) LYBA B) 2511280600 C) 2512021600
+D) 0600-1600
+E) TEMPORARY RESERVED AREA:
+454105N 0185644E - LINE IN CLOCKWISE DIRECTION ON THE ARC OF A
+CIRCLE WITH A RADIUS OF 3NM CENTERED ON
+454003N 0185918E (APATIN VEKOM) -
+453846N 0185659E - 453927N 0185802E - 454003N 0185824E - 454033N
+0185756E - 454105N 0185644E ACT.
+ENTRY ONLY BY ATC AUTHORIZATION.
+F) GND G) 700FT AGL
+
+        NIJE LEPO PARSIRAO
+         * 
+         * 
+         * 
+         
+         
+         */
+
 
         /// <summary>
         /// Determines whether the provided NOTAM text is related to airspace.
@@ -116,17 +139,6 @@ namespace NOTAM_Browser
 
                     result.Add(new LatLon { Latitude = lat, Longitude = lon, ConvertedString = match.Value, Index = match.Index });
                 }
-
-                /*if (radiusMeters.HasValue)
-                {
-                    // Generate a circle around the coordinate if radius is specified
-                    var circleCoords = GenerateCircle(result.Last(), radiusMeters.Value);
-                    circleCoords.First().ConvertedString = result.Last().ConvertedString; // Keep the original point's string
-                    circleCoords.First().Index = result.Last().Index; // Keep the original point's index
-
-                    result.RemoveAt(result.Count - 1); // Remove the original point
-                    result.AddRange(circleCoords);
-                }*/
             }
 
             // Sort coordinates by their appearance order in the NOTAM text
@@ -139,6 +151,11 @@ namespace NOTAM_Browser
             if (radiusMeters.HasValue && result.Count == 1)
             {
                 var circle = GenerateCircle(result[0], radiusMeters.Value);
+
+                // Dirty set incorrect data to a point just to be used for underlining NOTAM text
+                circle.First().ConvertedString = result.Last().ConvertedString;
+                circle.First().Index = result.Last().Index;
+
                 result = circle;
             }
 
@@ -150,7 +167,12 @@ namespace NOTAM_Browser
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
 
-            var arcMatches = arcRegex.Matches(input);
+
+
+            string fixedInput = input.Replace("\r\n", " ").Replace("\n", " ").Replace("  ", " ");
+
+
+            var arcMatches = arcRegex.Matches(fixedInput);
             if (arcMatches.Count > 0 && result.Count > 1)
             {
                 var updated = new List<LatLon>(result);
@@ -175,7 +197,7 @@ namespace NOTAM_Browser
                     var after = result.FirstOrDefault(c => c.Index > arc.Index + arc.Length);
                     if (before == null || after == null) continue;
 
-                    var arcPoints = GenerateArc(center, before, after, radiusNm * 1852, clockwise, 10);
+                    var arcPoints = GenerateArc(center, before, after, radiusNm * 1852, clockwise);
 
                     // Replace straight line segment with arc points
                     int insertIndex = updated.FindIndex(c => c.Index == before.Index);
@@ -277,7 +299,7 @@ namespace NOTAM_Browser
         /// <summary>
         /// Generates coordinates along an arc of a circle between two points, centered on a given coordinate.
         /// </summary>
-        public static List<LatLon> GenerateArc(LatLon center, LatLon start, LatLon end, double radiusMeters, bool clockwise, int degreesPerPoint = 10)
+        public static List<LatLon> GenerateArc(LatLon center, LatLon start, LatLon end, double radiusMeters, bool clockwise, int degreesPerPoint = 5)
         {
             //return new List<LatLon>() { start, center, end };
             var results = new List<LatLon>();

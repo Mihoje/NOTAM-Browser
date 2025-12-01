@@ -5,6 +5,9 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using NOTAM_Browser.Helpers;
+using System.Threading;
+using System.Web.UI;
+using System.Threading.Tasks;
 
 #if DEBUG
 using System.Diagnostics;
@@ -12,17 +15,51 @@ using System.Diagnostics;
 
 namespace NOTAM_Browser
 {
+    /*
+     * 
+     * TODO: Print preset. Da moze isto da korisnik napravi preset za stampu kao sto moze za poly.
+     * Da mogu da se sacuvaju vise preseta i da se biraju iz liste.
+     * Da mogu da se importuju.
+     * 
+     */
     public partial class frmMain : Form
     {
+        public int FirstTimeLoadedNotams { get; private set; }
+        public int FirstTimeNotamCount { get; private set; }
+
+        public bool FirstTimeFinishedLoading { get; private set; }
+
+        public frmAckNotams FrmAckNotams => frmAckNotams;
+        public int AckownledgedNotamsCount => nos.AcknowledgedNotams.Count;
+
+        private bool _startedLoading = false;
         private readonly Notams nos;
         private Font notamFont;
-        private readonly frmAckNotams frmAckNotams;
-        private readonly frmMap mapForm;
+        public frmAckNotams frmAckNotams;
+        public frmMap mapForm;
         private string notamIdClicked;
 
-        public frmMain()
+        public struct DisplayedNotam 
         {
+            public string NotamID;
+            public List<HighlightedCoordinate> HighlightedCoordinates;
+            public string Text;
+        }
+        
+        public struct HighlightedCoordinate
+        {
+            public int Index;
+            public int ConvertedStringLength;
+        }
+
+        public frmMain(Notams nos)
+        {
+            FirstTimeLoadedNotams = 0;
+            FirstTimeNotamCount = -1;
+            FirstTimeFinishedLoading = false;
+
             InitializeComponent();
+            Visible = false;
 
             notamFont = Settings.Default.notamFont;
 
@@ -36,24 +73,51 @@ namespace NOTAM_Browser
 
             updateSearchHistory();
 
-            nos = new Notams();
-            frmAckNotams = new frmAckNotams(nos);
-            mapForm = new frmMap(nos);
+            this.nos = nos;
+            FirstTimeNotamCount = nos.CurrentNotams.Count;
 
             notamIdClicked = string.Empty;
 
             nos.NotamAcknowledged += NewNotamAcknowledged;
             nos.NotamUnacknowledged += NewNotamUnacknowledged;
         }
+        protected override void SetVisibleCore(bool value)
+        {
+            if (!IsHandleCreated)
+            {
+                base.SetVisibleCore(false);
+                return;
+            }
+            base.SetVisibleCore(value);
+        }
+
+        public void FinishedLoading()
+        {
+            frmAckNotams = new frmAckNotams(nos);
+            frmAckNotams.LoadNotams();
+            mapForm = new frmMap(nos);
+
+            UpdateFooter();
+
+            // bring to front hack
+            this.WindowState = FormWindowState.Normal;
+            this.Activate();
+            this.TopMost = true;
+            this.TopMost = false;
+
+            FirstTimeFinishedLoading = true;
+        }
 
         private void frmMain_Load(object sender, EventArgs e)
         {
-            showNotams(new Dictionary<string, string>(nos.CurrentNotams));
-            cmbSearch.Text = nos.LastSearch;
-            cmbSearch.SelectionStart = cmbSearch.Text.Length;
-            slblLatestNotam.Text = $"Poslednje ažuriranje: {nos.CurrentNotamsTime}";
-
             tooltipDesignators.SetToolTip(cmbSearch, "Unesi ICAO designator ili više njih razdvojenih zarezom.\n\nPrimer:'LYBT' ili 'LYBT,LYBA'");
+
+            if (!_startedLoading)
+            {
+                _startedLoading = true;
+                showNotams(new Dictionary<string, string>(nos.CurrentNotams));
+                FinishedLoading();
+            }
         }
 
         private void updateSearchHistory()
@@ -110,11 +174,11 @@ namespace NOTAM_Browser
             }
         }
 
-        private void showNotams(Dictionary<string, string> Notams)
+        public List<DisplayedNotam> _getNotamsReadyToShow(Dictionary<string, string> Notams)
         {
-            tlpMain.Controls.Clear();
-            tlpMain.RowStyles.Clear();
-            tlpMain.RowCount = 0;
+            _startedLoading = true;
+
+            List<DisplayedNotam> displayedNotams = new List<DisplayedNotam>();
 
             foreach (var pair in Notams)
             {
@@ -126,25 +190,7 @@ namespace NOTAM_Browser
 
                 var zone = NotamParser.TryFindZone(notamText);
 
-                CheckBox chk = new CheckBox()
-                {
-                    Name = $"chkNotam{pair.Key}",
-                    Checked = nos.AcknowledgedNotams.ContainsKey(pair.Key)
-                };
-
-                RichTextBox txt = new ScrollTransparentTextBox()
-                {
-                    Name = $"txtNotam{pair.Key}",
-                    Text = notamText,
-                    WordWrap = false,
-                    ScrollBars = RichTextBoxScrollBars.Horizontal,//ScrollBars.Horizontal,
-                    Multiline = true,
-                    ReadOnly = true,
-                    ForeColor = nos.AcknowledgedNotams.ContainsKey(pair.Key) ? Color.Gray : DefaultForeColor,
-                    BackColor = BackColor,
-                    Font = notamFont,
-                    Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
-                };
+                var highlightedCoordinates = new List<HighlightedCoordinate>();
 
                 foreach (var c in coordinates)
                 {
@@ -152,14 +198,15 @@ namespace NOTAM_Browser
 
                     if (c.Index < 0 || c.Index >= notamText.Length) continue;
 
-                    string temp = txt.Text.Substring(0, c.Index);
+                    string temp = notamText.Substring(0, c.Index);
 
                     int diff = temp.Length - temp.Replace("\n", "").Length;
 
-                    txt.SelectionStart = c.Index - diff;
-                    txt.SelectionLength = c.ConvertedStringLength;
-                    //txt.SelectionColor = Color.Green;
-                    txt.SelectionFont = new Font(txt.Font, FontStyle.Underline);
+                    highlightedCoordinates.Add(new HighlightedCoordinate()
+                    {
+                        Index = c.Index - diff,
+                        ConvertedStringLength = c.ConvertedStringLength
+                    });
                 }
 
                 if (zone != null && coordinates.Count == 0)
@@ -168,18 +215,68 @@ namespace NOTAM_Browser
 
                     if (zone.Index < 0 || zone.Index >= notamText.Length) continue;
 
-                    string temp = txt.Text.Substring(0, zone.Index);
+                    string temp = notamText.Substring(0, zone.Index);
 
                     int diff = temp.Length - temp.Replace("\n", "").Length;
 
-                    txt.SelectionStart = zone.Index - diff;
-                    txt.SelectionLength = zone.ConvertedStringLength;
-                    //txt.SelectionColor = Color.Green;
-                    txt.SelectionFont = new Font(txt.Font, FontStyle.Underline);
+                    highlightedCoordinates.Add(new HighlightedCoordinate()
+                    {
+                        Index = zone.Index - diff,
+                        ConvertedStringLength = zone.ConvertedStringLength
+                    });
                 }
 
-                txt.SelectionStart = 0;
-                txt.SelectionLength = 0;
+
+                displayedNotams.Add(new DisplayedNotam()
+                {
+                    NotamID = pair.Key,
+                    HighlightedCoordinates = highlightedCoordinates,
+                    Text = notamText
+                });
+
+                if (!FirstTimeFinishedLoading)
+                    FirstTimeLoadedNotams++;
+            }
+
+            return displayedNotams;
+        }
+
+        public void _displayNotams(List<DisplayedNotam> Notams)
+        {
+            tlpMain.SuspendLayout();
+            tlpMain.Controls.Clear();
+            tlpMain.RowStyles.Clear();
+            tlpMain.RowCount = 0;
+            
+            foreach (DisplayedNotam item in Notams)
+            {
+                CheckBox chk = new CheckBox()
+                {
+                    Name = $"chkNotam{item.NotamID}",
+                    Checked = nos.AcknowledgedNotams.ContainsKey(item.NotamID)
+                };
+
+                RichTextBox txt = new ScrollTransparentTextBox()
+                {
+                    Name = $"txtNotam{item.NotamID}",
+                    Text = item.Text,
+                    WordWrap = false,
+                    ScrollBars = RichTextBoxScrollBars.Horizontal,//ScrollBars.Horizontal,
+                    Multiline = true,
+                    ReadOnly = true,
+                    ForeColor = nos.AcknowledgedNotams.ContainsKey(item.NotamID) ? Color.Gray : DefaultForeColor,
+                    BackColor = BackColor,
+                    Font = notamFont,
+                    Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+                };
+
+                Font highlightFont = new Font(txt.Font, FontStyle.Underline);
+
+                foreach (var hc in item.HighlightedCoordinates)
+                {
+                    txt.Select(hc.Index, hc.ConvertedStringLength);
+                    txt.SelectionFont = highlightFont;
+                }
 
                 chk.CheckedChanged += Chk_CheckedChanged;
                 txt.MouseDown += Txt_Click;
@@ -191,14 +288,25 @@ namespace NOTAM_Browser
                 tlpMain.Controls.Add(txt, 1, tlpMain.RowCount - 1);
 
 #if DEBUG
-                Debug.WriteLine($"frmMain: Dodao red za {pair.Key}\tControl count: {tlpMain.Controls.Count}\t Row count: {tlpMain.RowCount}");
-                Debug.WriteLine($"frmMain: RowStyle {tlpMain.RowStyles[tlpMain.RowCount-1].SizeType} {tlpMain.RowStyles[tlpMain.RowCount-1].Height}");
+                Debug.WriteLine($"frmMain: Dodao red za {item.NotamID}\tControl count: {tlpMain.Controls.Count}\t Row count: {tlpMain.RowCount}");
+                Debug.WriteLine($"frmMain: RowStyle {tlpMain.RowStyles[tlpMain.RowCount - 1].SizeType} {tlpMain.RowStyles[tlpMain.RowCount - 1].Height}");
 #endif
             }
 
+
             SetTextBoxHeights();
 
+
+            tlpMain.ResumeLayout();
+
+
             slblData.Text = $"NOTAM-i za: {nos.LastSearch} | {tlpMain.RowCount} NOTAM{(tlpMain.RowCount == 1 ? "" : "-a")}";
+        }
+
+        private void showNotams(Dictionary<string, string> Notams)
+        {
+            var notamsToShow = _getNotamsReadyToShow(Notams);
+            _displayNotams(notamsToShow);
         }
 
         private void RefreshNotams()
@@ -207,6 +315,13 @@ namespace NOTAM_Browser
                 showNotams(nos.GetNotamsForDate(dtpFilterDatum.Value));
             else
                 showNotams(new Dictionary<string, string>(nos.CurrentNotams));
+        }
+
+        public void UpdateFooter()
+        {
+            cmbSearch.Text = nos.LastSearch;
+            cmbSearch.SelectionStart = cmbSearch.Text.Length;
+            slblLatestNotam.Text = $"Poslednje ažuriranje: {nos.CurrentNotamsTime}";            
         }
 
         #region "Event Handlers"
@@ -219,6 +334,7 @@ namespace NOTAM_Browser
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             mapForm.ClosingApp();
+            Application.Exit();
             //Environment.Exit(0);
         }
 

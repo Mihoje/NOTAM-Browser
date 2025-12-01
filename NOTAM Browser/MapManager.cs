@@ -19,12 +19,12 @@ namespace NOTAM_Browser
 
     internal static class MapManager
     {
-        private static string FILENAME = "polys.json";
+        private static readonly string FILENAME = "polys.json";
         private static string fullFileName { get { return Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), FILENAME); } }
 
         #region "Optimizing Saving"
         private const int SAVE_TIMER_INTERVAL = 500;
-        private static System.Timers.Timer saveTimer;
+        private static readonly System.Timers.Timer saveTimer;
         private static PolyData _polyDataToSave;
 
         private static void _saveCachedFile(object sender, ElapsedEventArgs e)
@@ -53,19 +53,19 @@ namespace NOTAM_Browser
 
         static MapManager()
         {
-            saveTimer = new System.Timers.Timer();
-            saveTimer.Enabled = false;
-            saveTimer.AutoReset = false;
-            saveTimer.Interval = SAVE_TIMER_INTERVAL;
+            saveTimer = new System.Timers.Timer
+            {
+                Enabled = false,
+                AutoReset = false,
+                Interval = SAVE_TIMER_INTERVAL
+            };
             saveTimer.Elapsed += _saveCachedFile;
         }
 
         private static void _saveFile(PolyData polyData, bool instant = false)
         {
             if (saveTimer.Enabled)
-            {
                 saveTimer.Stop();
-            }
             
             _polyDataToSave = polyData;
 
@@ -258,8 +258,10 @@ namespace NOTAM_Browser
             string groupName = id.Substring(0, id.IndexOf('_'));
             string zoneName = id.Substring(groupName.Length + 1);
 
-            var group = new Group();
-            group.Name = groupName;
+            var group = new Group
+            {
+                Name = groupName
+            };
             group.Polygons.Add(zoneName, zoneData);
 
             var root = new PolyData();

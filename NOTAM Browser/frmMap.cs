@@ -15,11 +15,6 @@ using GMap.NET;
 using System.Security.Policy;
 using System.Configuration;
 using System.Xml.Linq;
-//using static System.Net.WebRequestMethods;
-
-
-
-
 
 #if DEBUG
 using System.Diagnostics;
@@ -27,6 +22,7 @@ using System.Diagnostics;
 
 namespace NOTAM_Browser
 {
+
     public partial class frmMap : Form
     {
         private readonly Notams nos;
@@ -91,7 +87,7 @@ namespace NOTAM_Browser
                 gMapControl1.MapProvider = mapProviders.ElementAt(0).Value;
             }
 
-            GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerAndCache;
+            GMaps.Instance.Mode = GMap.NET.AccessMode.ServerAndCache;
             gMapControl1.DragButton = MouseButtons.Left;
             gMapControl1.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionWithoutCenter;
             gMapControl1.ShowCenter = false;
@@ -795,7 +791,7 @@ namespace NOTAM_Browser
 
                         MapManager.AddPolys(polydata, true);
 
-                        // this is the shitties code i've seen in a while but it works for now.
+                        // this is the shittiest code i've seen in a while but it works for now.
                         foreach(var g in polydata.Groups)
                         {
                             if(g.Value == null)
@@ -1086,6 +1082,11 @@ namespace NOTAM_Browser
                 ctxChkList.SourceControl.Name != "chk_Custom"
                 ) return;
 
+            var result = MessageBox.Show("Da li si siguran da želiš da obrišeš sve zone iz liste?", "Potvrda brisanja", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if(result != DialogResult.Yes)
+                return;
+
             var chkList = ctxChkList.SourceControl as CheckedListBox;
 
             var pd = new PolyData();
@@ -1268,6 +1269,22 @@ namespace NOTAM_Browser
             chk.SelectedIndex = index;
 
             refreshMap();
+        }
+
+        private void nudTextSize_ValueChanged(object sender, EventArgs e)
+        {
+            foreach (var overlay in gMapControl1.Overlays)
+            {
+                foreach (var marker in overlay.Markers)
+                {
+                    if (marker is GMapLevelBlock lb)
+                    {
+                        lb.FontHeightInMeters = (int)nudTextSize.Value * 100;
+                    }
+                }
+            }
+
+            gMapControl1.Refresh();
         }
     }
 }

@@ -74,6 +74,7 @@ namespace NOTAM_Browser
                 Settings.Default.notamPre = (string)Settings.Default.Properties["notamPre"].DefaultValue;
                 Settings.Default.notamAft = (string)Settings.Default.Properties["notamAft"].DefaultValue;
                 Settings.Default.mapyApiKey = (string)Settings.Default.Properties["mapyApiKey"].DefaultValue;
+                Settings.Default.upgradeRequired = false;
                 Settings.Default.Save();
                 loadData();
                 showRestartNotification();
